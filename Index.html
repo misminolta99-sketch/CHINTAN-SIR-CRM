@@ -163,6 +163,10 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
     To-Do &amp; Schedule
   </div>
+  <div class="nav-item" data-section="meetingnotes">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    Meeting Notes
+  </div>
   <div class="nav-item" data-section="leads">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
     Leads
@@ -182,6 +186,10 @@
   <div class="nav-item" data-section="expenses">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
     Expenses
+  </div>
+  <div class="nav-item" data-section="cashvouchers">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12a2 2 0 0 0 2 2h14v-4"/><circle cx="16" cy="12" r="2"/></svg>
+    Cash Vouchers
   </div>
   <div class="nav-item" data-section="customers">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -247,6 +255,89 @@
         </tr></thead><tbody id="taskRows"></tbody></table>
       </div>
       <div class="empty-state" id="taskEmptyState" style="display:none;">No tasks yet — plan your day.<div><button class="btn btn-ghost" id="clearTaskFiltersBtn">Clear filters</button></div></div>
+    </div>
+  </section>
+
+  <!-- ============ MEETING NOTES SECTION ============ -->
+  <section id="section-meetingnotes" style="display:none;">
+    <div class="topbar">
+      <div><div class="page-title">Meeting Notes</div><div class="page-sub">Discussion points, minutes, and action items — right here instead of a separate app.</div></div>
+      <div class="btn-group">
+        <button class="btn btn-dark" id="exportMeetingActionsBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>Export action items</button>
+        <button class="btn btn-primary" id="addMeetingBtn">+ New meeting</button>
+      </div>
+    </div>
+    <div class="cards">
+      <div class="card"><div class="card-label">Total meetings</div><div class="card-value" id="statMnTotal">0</div></div>
+      <div class="card upcoming"><div class="card-label">Upcoming</div><div class="card-value" id="statMnUpcoming">0</div></div>
+      <div class="card"><div class="card-label">Open action items</div><div class="card-value" id="statMnOpenActions">0</div></div>
+      <div class="card overdue"><div class="card-label">Overdue actions</div><div class="card-value" id="statMnOverdueActions">0</div></div>
+    </div>
+    <div class="ledger" style="padding:18px 20px; margin-bottom:20px;">
+      <div class="card-label" style="margin-bottom:10px;">Open action items (across all meetings)</div>
+      <div id="mnOpenActionsList"></div>
+    </div>
+    <div class="toolbar">
+      <input type="text" class="search" id="meetingSearchBox" placeholder="Search meetings, attendees…">
+      <select class="stage-filter" id="meetingStatusFilter">
+        <option value="all">All statuses</option>
+        <option value="Scheduled">Scheduled</option>
+        <option value="Completed">Completed</option>
+        <option value="Cancelled">Cancelled</option>
+      </select>
+    </div>
+    <div class="ledger" style="margin-bottom:26px;">
+      <div class="table-scroll">
+        <table><thead><tr>
+          <th>Date</th>
+          <th>Title</th>
+          <th>With whom</th>
+          <th>Mode</th>
+          <th>Points / actions</th>
+          <th>Status</th>
+          <th></th>
+        </tr></thead><tbody id="meetingRows"></tbody></table>
+      </div>
+      <div class="empty-state" id="meetingEmptyState" style="display:none;">No meetings yet.<div><button class="btn btn-ghost" id="clearMeetingFiltersBtn">Clear filters</button></div></div>
+    </div>
+
+    <div id="mnNoSelection" class="ledger" style="padding:30px; text-align:center; color:var(--muted);">Select a meeting above to see its discussion points, minutes, and action items here.</div>
+
+    <div id="mnSelectedMeeting" style="display:none;">
+      <div class="topbar">
+        <div><div class="page-title" id="mnDetailTitle">Meeting</div><div class="page-sub" id="mnDetailMeta"></div></div>
+        <div class="btn-group">
+          <button class="btn btn-ghost" id="mnEditMeetingBtn">Edit meeting</button>
+          <button class="btn btn-dark" id="mnPrintBtn">Print minutes</button>
+        </div>
+      </div>
+
+      <div class="ledger" style="padding:20px 22px; margin-bottom:18px;">
+        <div class="card-label" style="margin-bottom:4px;">Discussion points</div>
+        <div class="field-hint" style="margin-bottom:14px;">Jot what you want to raise beforehand, tick it off once covered, and note what was actually said underneath.</div>
+        <div id="mnPointsList"></div>
+        <div class="add-row" style="display:flex; gap:8px; margin-top:10px;">
+          <input type="text" id="mnNewPointInput" placeholder="Add a discussion point…" style="flex:1; padding:9px 11px; border-radius:7px; border:1px solid var(--line);">
+          <button class="btn btn-ghost btn-sm" id="mnAddPointBtn">Add</button>
+        </div>
+      </div>
+
+      <div class="ledger" style="padding:20px 22px; margin-bottom:18px;">
+        <div class="card-label" style="margin-bottom:4px;">Minutes of meeting</div>
+        <div class="field-hint" style="margin-bottom:10px;">The formal wrap-up — summary and decisions, once the meeting's done. Saved when you click away.</div>
+        <textarea id="mnMomSummary" style="width:100%; min-height:110px; padding:10px 12px; border-radius:7px; border:1px solid var(--line); font-family:inherit; font-size:13px;" placeholder="Summary of what was discussed, decisions made, key outcomes…"></textarea>
+      </div>
+
+      <div class="ledger" style="padding:20px 22px;">
+        <div class="card-label" style="margin-bottom:10px;">Action items</div>
+        <div id="mnActionsList"></div>
+        <div class="field-row" style="margin-top:10px;">
+          <input type="text" id="mnNewActionText" placeholder="Action item…" style="flex:2; padding:9px 11px; border-radius:7px; border:1px solid var(--line);">
+          <input type="text" id="mnNewActionOwner" placeholder="Owner" style="flex:1; padding:9px 11px; border-radius:7px; border:1px solid var(--line);">
+          <input type="date" id="mnNewActionDue" style="flex:1; padding:9px 11px; border-radius:7px; border:1px solid var(--line);">
+        </div>
+        <button class="btn btn-ghost btn-sm" id="mnAddActionBtn" style="margin-top:8px;">+ Add action item</button>
+      </div>
     </div>
   </section>
 
@@ -443,15 +534,47 @@
     </div>
   </section>
 
+  <!-- ============ CASH VOUCHERS SECTION ============ -->
+  <section id="section-cashvouchers" style="display:none;">
+    <div class="topbar">
+      <div><div class="page-title">Cash Vouchers</div><div class="page-sub">Reimbursement paperwork — each entry can be printed as a proper cash payment voucher. Nature of expense is free text, so you can add or edit it however you like.</div></div>
+      <div class="btn-group">
+        <button class="btn btn-dark" id="exportCashVouchersBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>Export Excel</button>
+        <button class="btn btn-primary" id="addCashVoucherBtn">+ Add voucher</button>
+      </div>
+    </div>
+    <div class="cards">
+      <div class="card overdue"><div class="card-label">Total reimbursed</div><div class="card-value" id="statCvTotal">₹0</div></div>
+      <div class="card"><div class="card-label">Vouchers</div><div class="card-value" id="statCvCount">0</div></div>
+    </div>
+    <div class="toolbar"><input type="text" class="search" id="cvSearchBox" placeholder="Search voucher no., paid to, or nature of expense…"></div>
+    <div class="ledger">
+      <div class="table-scroll">
+        <table><thead><tr>
+          <th>Voucher no. / date</th>
+          <th>Paid to</th>
+          <th>Entries</th>
+          <th class="num">Total</th>
+          <th>Notes</th>
+          <th></th>
+        </tr></thead><tbody id="cashVoucherRows"></tbody></table>
+      </div>
+      <div class="empty-state" id="cvEmptyState" style="display:none;">No cash vouchers yet.<div><button class="btn btn-ghost" id="clearCvFiltersBtn">Clear search</button></div></div>
+    </div>
+  </section>
+
   <!-- ============ CUSTOMERS SECTION ============ -->
   <section id="section-customers" style="display:none;">
     <div class="topbar">
       <div><div class="page-title">Customer database</div><div class="page-sub">Everything you need on a customer, in one place — used to auto-fill leads &amp; sales entries.</div></div>
       <div class="btn-group">
+        <button class="btn btn-ghost" id="importCustomersBtn">Import from Excel</button>
+        <input type="file" id="customerImportFileInput" accept=".xlsx,.xls" style="display:none;">
         <button class="btn btn-dark" id="exportCustomersBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>Export Excel</button>
         <button class="btn btn-primary" id="addCustomerBtn">+ Add customer</button>
       </div>
     </div>
+    <div class="field-hint" style="margin-bottom:14px;">Import matches your column headers flexibly (e.g. "Customer Name", "Name", or "Customer" all work) — it adds new customers and fills in blank fields on existing ones by matching on name. It never overwrites a field that already has a value.</div>
     <div class="toolbar"><input type="text" class="search" id="customerSearchBox" placeholder="Search customers…"></div>
     <div class="ledger">
       <div class="table-scroll">
@@ -577,6 +700,32 @@
   <div class="panel-footer">
     <button class="btn btn-ghost" data-close>Cancel</button>
     <button class="btn btn-primary" id="saveTaskBtn">Save task</button>
+  </div>
+</div>
+
+<div class="panel" id="meetingPanel">
+  <div class="panel-header"><div class="panel-title" id="meetingPanelTitle">New meeting</div><button class="panel-close" data-close>&times;</button></div>
+  <div class="panel-body">
+    <input type="hidden" id="mtId">
+    <div class="field"><label for="mtTitle">Title</label><input type="text" id="mtTitle" placeholder="e.g. Weekly sync with Kalyan Ready-Mix"></div>
+    <div class="field"><label for="mtWithWhom">With whom</label><input type="text" id="mtWithWhom" list="customerNameList" placeholder="e.g. Rohit Sharma, Kalyan Ready-Mix"></div>
+    <div class="field-row">
+      <div class="field"><label for="mtDate">Date</label><input type="date" id="mtDate"></div>
+      <div class="field"><label for="mtTime">Time (optional)</label><input type="time" id="mtTime"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label for="mtMode">Mode</label>
+        <select id="mtMode"><option>In-person</option><option>Call</option><option>Video Call</option><option>Other</option></select>
+      </div>
+      <div class="field"><label for="mtStatus">Status</label>
+        <select id="mtStatus"><option>Scheduled</option><option>Completed</option><option>Cancelled</option></select>
+      </div>
+    </div>
+    <button class="delete-link" id="deleteMeetingBtn" style="display:none;">Delete this meeting (and its points &amp; action items)</button>
+  </div>
+  <div class="panel-footer">
+    <button class="btn btn-ghost" data-close>Cancel</button>
+    <button class="btn btn-primary" id="saveMeetingBtn">Save meeting</button>
   </div>
 </div>
 
@@ -783,6 +932,36 @@
   </div>
 </div>
 
+<div class="panel" id="cashVoucherPanel">
+  <div class="panel-header"><div class="panel-title" id="cvPanelTitle">Add voucher</div><button class="panel-close" data-close>&times;</button></div>
+  <div class="panel-body">
+    <input type="hidden" id="cvId">
+    <div class="field"><label for="cvTitle">Title</label><input type="text" id="cvTitle" placeholder="e.g. Travel expenses — August 2026"></div>
+    <div class="field-row">
+      <div class="field"><label for="cvNo">Voucher no.</label><input type="text" id="cvNo"></div>
+      <div class="field"><label for="cvDate">Date</label><input type="date" id="cvDate"></div>
+    </div>
+    <div class="field"><label for="cvPaidTo">Paid to (reimbursed to)</label><input type="text" id="cvPaidTo" placeholder="e.g. your name, or the employee"></div>
+
+    <div class="section-label">
+      Entries <button type="button" class="add-field-btn" id="cvAddItemBtn">+ Add entry</button>
+    </div>
+    <div id="cvItemsContainer"></div>
+    <div class="calc-preview" id="cvCalcPreview">
+      <div class="row total"><span>Total</span><span id="cvPvTotal">₹0</span></div>
+    </div>
+
+    <div class="field" style="margin-top:14px;"><label for="cvNotes">Notes</label><textarea id="cvNotes"></textarea></div>
+    <div class="field-hint">This is a separate record from the Expenses tab, purely for reimbursement paperwork — it doesn't feed into the Net Profit figure there. If you also log the same cost as an Expense, only count it once when reviewing profit.</div>
+    <button class="delete-link" id="deleteCashVoucherBtn" style="display:none;">Delete this voucher</button>
+  </div>
+  <div class="panel-footer">
+    <button class="btn btn-ghost" data-close>Cancel</button>
+    <button class="btn btn-ghost" id="printCashVoucherBtn">Print voucher</button>
+    <button class="btn btn-primary" id="saveCashVoucherBtn">Save voucher</button>
+  </div>
+</div>
+
 <div class="panel" id="customerPanel">
   <div class="panel-header"><div class="panel-title" id="customerPanelTitle">Add customer</div><button class="panel-close" data-close>&times;</button></div>
   <div class="panel-body">
@@ -897,6 +1076,7 @@
 <datalist id="paymentModeList">
   <option value="NEFT"><option value="RTGS"><option value="Cheque"><option value="Cash"><option value="UPI">
 </datalist>
+<datalist id="cvNatureList"></datalist>
 <datalist id="expenseCategoryList">
   <option value="Rent"><option value="Salaries"><option value="Transport"><option value="Utilities">
   <option value="Office Supplies"><option value="Marketing"><option value="Bank Charges"><option value="Miscellaneous">
@@ -921,6 +1101,12 @@ const K = {
   expenses: COMPANY_ID + '_expenses_v1',
   payments: COMPANY_ID + '_payments_v1',
   tasks: COMPANY_ID + '_tasks_v1',
+  cashVouchers: COMPANY_ID + '_cash_vouchers_v1',
+  cvSeq: COMPANY_ID + '_cv_seq_v1',
+  meetingNotes: COMPANY_ID + '_meeting_notes_v1',
+  meetings: COMPANY_ID + '_meetings_v1',
+  meetingPoints: COMPANY_ID + '_meeting_points_v1',
+  meetingActions: COMPANY_ID + '_meeting_actions_v1',
   leadSeq: COMPANY_ID + '_lead_seq_v1',
   profile: COMPANY_ID + '_profile_v1',
 };
@@ -1019,6 +1205,51 @@ function seedTasks(){
     { id: uid('TK'), title:'Send Shreeji Infra their statement', description:'', dueDate: iso(2), dueTime:'', priority:'Medium', status:'Pending', relatedTo:'Shreeji Infra Pvt Ltd', notes:'' },
   ];
 }
+function nextCvNo(){
+  let n = Number(localStorage.getItem(K.cvSeq) || '0') + 1;
+  try{ localStorage.setItem(K.cvSeq, String(n)); }catch(e){}
+  return 'CV-' + String(n).padStart(5,'0');
+}
+function seedCashVouchers(){
+  const t = new Date(); const iso = (o)=>{ const d=new Date(t); d.setDate(d.getDate()+o); return d.toISOString().slice(0,10); };
+  return [
+    { id: uid('CV'), voucherNo: nextCvNo(), title:'Client visit expenses', date: iso(-6), paidTo:'Self',
+      items: [
+        { nature:'Local travel — client visit', amount:850 },
+        { nature:'Parking', amount:60 },
+      ],
+      notes:'' },
+  ];
+}
+let _mtSeedBundle = null;
+function getMtSeedBundle(){
+  if(_mtSeedBundle) return _mtSeedBundle;
+  const t = new Date(); const iso = (o)=>{ const d=new Date(t); d.setDate(d.getDate()+o); return d.toISOString().slice(0,10); };
+  const meetingId = uid('MT');
+  _mtSeedBundle = {
+    meetings: [{ id: meetingId, title:'Intro call — Kalyan Ready-Mix', withWhom:'Rohit Sharma, Kalyan Ready-Mix', date: iso(-3), time:'', mode:'Call', status:'Completed', momSummary:'Discussed pricing for F10-equivalent, sample already sent. Wants a formal quote by end of week.' }],
+    points: [{ id: uid('PT'), meetingId, text:'Confirm packing size preference', notes:'25kg bags preferred for easier handling on site.', done:true }],
+    actions: [{ id: uid('AC'), meetingId, text:'Send formal quotation', owner:'', dueDate: iso(2), done:false }],
+  };
+  return _mtSeedBundle;
+}
+function seedMeetings(){ return getMtSeedBundle().meetings; }
+function seedMeetingPointsData(){ return getMtSeedBundle().points; }
+function seedMeetingActionsData(){ return getMtSeedBundle().actions; }
+function migrateOldMeetingNotes(meetings){
+  try{
+    const raw = localStorage.getItem(K.meetingNotes);
+    if(!raw) return meetings;
+    const old = JSON.parse(raw);
+    if(!Array.isArray(old) || !old.length) return meetings;
+    old.forEach(n => {
+      meetings.push({ id: uid('MT'), title: n.title||'Untitled meeting', withWhom: n.relatedTo||n.attendees||'', date: n.date||todayISO(), time:'', mode:'Other', status:'Completed', momSummary: n.notes||'' });
+    });
+    localStorage.removeItem(K.meetingNotes);
+    saveArr(K.meetings, meetings);
+  }catch(e){}
+  return meetings;
+}
 
 function defaultProfile(){
   return {
@@ -1045,6 +1276,11 @@ let PURCHASES = loadArr(K.purchases, () => seedPurchases(PRODUCTS));
 let EXPENSES = loadArr(K.expenses, seedExpenses);
 let PAYMENTS = loadArr(K.payments, seedPayments);
 let TASKS = loadArr(K.tasks, seedTasks);
+let CASH_VOUCHERS = loadArr(K.cashVouchers, seedCashVouchers);
+let MEETINGS = loadArr(K.meetings, seedMeetings);
+MEETINGS = migrateOldMeetingNotes(MEETINGS);
+let MEETING_POINTS = loadArr(K.meetingPoints, seedMeetingPointsData);
+let MEETING_ACTIONS = loadArr(K.meetingActions, seedMeetingActionsData);
 let PROFILE = loadObj(K.profile, defaultProfile);
 
 let leadFilters = { search:'', stage:'all', urgency:'all' };
@@ -1053,6 +1289,9 @@ let purchaseSearch = '';
 let expenseSearch = '';
 let paymentSearch = '';
 let taskFilters = { search:'', urgency:'all' };
+let cvSearch = '';
+let meetingFilters = { search:'', status:'all' };
+let openMeetingId = null;
 let customerSearch = '';
 let supplierSearch = '';
 let productSearch = '';
@@ -1144,11 +1383,13 @@ function getPrimaryBankAccount(){
 function refreshSection(sectionKey){
   const refreshers = {
     todo: renderTasksAll,
+    meetingnotes: renderMeetingsAll,
     leads: renderLeadsAll,
     sales: renderSalesAll,
     payments: renderPaymentsAll,
     purchases: renderPurchasesAll,
     expenses: renderExpensesAll,
+    cashvouchers: renderCashVouchersAll,
     customers: renderCustomerTable,
     suppliers: renderSupplierTable,
     products: renderProductTable,
@@ -1307,6 +1548,316 @@ document.getElementById('clearTaskFiltersBtn').addEventListener('click', () => {
 document.getElementById('exportTasksBtn').addEventListener('click', () => {
   const rows = TASKS.map(t => ({ 'Title': t.title, 'Description': t.description, 'Due Date': t.dueDate, 'Due Time': t.dueTime, 'Priority': t.priority, 'Status': t.status, 'Related To': t.relatedTo, 'Notes': t.notes }));
   downloadWorkbook(rows, 'Tasks', COMPANY_LABEL.replace(/[^a-z0-9]+/gi,'_') + '_Tasks');
+});
+
+/* ================= MEETING NOTES ================= */
+function pointsFor(mid){ return MEETING_POINTS.filter(p=>p.meetingId===mid); }
+function actionsFor(mid){ return MEETING_ACTIONS.filter(a=>a.meetingId===mid); }
+function allOpenActions(){ return MEETING_ACTIONS.filter(a=>!a.done); }
+function meetingOf(mid){ return MEETINGS.find(m=>m.id===mid); }
+
+function renderMeetingStats(){
+  const today = todayISO();
+  const upcoming = MEETINGS.filter(m => m.status==='Scheduled' && m.date >= today).length;
+  const openActions = allOpenActions();
+  const overdueActions = openActions.filter(a => a.dueDate && a.dueDate < today).length;
+  document.getElementById('statMnTotal').textContent = MEETINGS.length;
+  document.getElementById('statMnUpcoming').textContent = upcoming;
+  document.getElementById('statMnOpenActions').textContent = openActions.length;
+  document.getElementById('statMnOverdueActions').textContent = overdueActions;
+
+  const list = openActions.map(a => ({ a, m: meetingOf(a.meetingId) }))
+    .sort((x,y) => (x.a.dueDate||'9999').localeCompare(y.a.dueDate||'9999'));
+  const container = document.getElementById('mnOpenActionsList');
+  if(!list.length){ container.innerHTML = '<div class="field-hint">No open action items — nice and clear.</div>'; return; }
+  container.innerHTML = list.map(x => `
+    <div style="display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line);">
+      <input type="checkbox" class="mn-quick-toggle" data-id="${x.a.id}" style="width:16px; height:16px;">
+      <div style="flex:1;">
+        <div style="font-size:13px;">${escapeHtml(x.a.text)}</div>
+        <div class="sub-line">${x.m?escapeHtml(x.m.title):''}${x.a.owner?' · '+escapeHtml(x.a.owner):''}</div>
+      </div>
+      ${x.a.dueDate ? `<span class="badge ${x.a.dueDate<today?'status-overdue':'status-upcoming'}">${formatDate(x.a.dueDate)}</span>` : ''}
+    </div>
+  `).join('');
+  container.querySelectorAll('.mn-quick-toggle').forEach(cb => cb.addEventListener('change', (e) => {
+    const a = MEETING_ACTIONS.find(x=>x.id===e.target.dataset.id);
+    if(a){ a.done = true; saveArr(K.meetingActions, MEETING_ACTIONS); renderMeetingsAll(); }
+  }));
+}
+function applyMeetingFilters(list){
+  return list.filter(m => {
+    if(meetingFilters.status !== 'all' && m.status !== meetingFilters.status) return false;
+    if(meetingFilters.search){
+      const q = meetingFilters.search.toLowerCase();
+      if(!(m.title+' '+(m.withWhom||'')).toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+}
+function renderMeetingTable(){
+  const tbody = document.getElementById('meetingRows');
+  const filtered = applyMeetingFilters(MEETINGS).slice().sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  tbody.innerHTML = '';
+  document.getElementById('meetingEmptyState').style.display = filtered.length ? 'none' : 'block';
+  const statusClass = { Completed:'status-cleared', Cancelled:'status-upcoming', Scheduled:'stage-Negotiation' };
+  filtered.forEach(m => {
+    const pts = pointsFor(m.id), acts = actionsFor(m.id), openActs = acts.filter(a=>!a.done);
+    const isSelected = m.id === openMeetingId;
+    const tr = document.createElement('tr');
+    tr.dataset.meetingRow = m.id;
+    tr.style.cursor = 'pointer';
+    if(isSelected) tr.style.background = '#F4F5F1';
+    tr.innerHTML = `
+      <td>${formatDate(m.date)}</td>
+      <td class="nametxt">${escapeHtml(m.title)}${isSelected?' <span class="sub-line">(viewing below)</span>':''}</td>
+      <td>${escapeHtml(m.withWhom||'—')}</td>
+      <td>${escapeHtml(m.mode||'—')}</td>
+      <td>${pts.length} point${pts.length===1?'':'s'}${openActs.length?', '+openActs.length+' open action'+(openActs.length===1?'':'s'):''}</td>
+      <td><span class="badge ${statusClass[m.status]||'stage-New'}">${escapeHtml(m.status)}</span></td>
+      <td><div class="row-actions">
+        <button class="btn btn-ghost btn-sm" data-action="view" data-id="${m.id}" title="View details">View</button>
+        <button class="icon-btn" data-action="edit" data-id="${m.id}" title="Edit">${ICONS.edit}</button>
+        <button class="icon-btn" data-action="delete" data-id="${m.id}" title="Delete">${ICONS.trash}</button>
+      </div></td>
+    `;
+    tr.addEventListener('click', (e) => {
+      if(e.target.closest('[data-action="edit"],[data-action="delete"],[data-action="view"]')) return;
+      selectMeeting(m.id, true);
+    });
+    tbody.appendChild(tr);
+  });
+  tbody.querySelectorAll('[data-action="view"]').forEach(b => b.addEventListener('click', ()=>selectMeeting(b.dataset.id, true)));
+  tbody.querySelectorAll('[data-action="edit"]').forEach(b => b.addEventListener('click', ()=>openMeetingPanel(b.dataset.id)));
+  tbody.querySelectorAll('[data-action="delete"]').forEach(b => b.addEventListener('click', ()=>{
+    if(confirm('Delete this meeting, its discussion points, and action items?')){
+      MEETING_POINTS = MEETING_POINTS.filter(p=>p.meetingId!==b.dataset.id);
+      MEETING_ACTIONS = MEETING_ACTIONS.filter(a=>a.meetingId!==b.dataset.id);
+      MEETINGS = MEETINGS.filter(m=>m.id!==b.dataset.id);
+      saveArr(K.meetings, MEETINGS); saveArr(K.meetingPoints, MEETING_POINTS); saveArr(K.meetingActions, MEETING_ACTIONS);
+      if(openMeetingId === b.dataset.id) openMeetingId = null;
+      renderMeetingsAll();
+    }
+  }));
+}
+function renderMeetingsAll(){
+  renderMeetingStats();
+  renderMeetingTable();
+  if(!openMeetingId && MEETINGS.length){
+    const mostRecent = [...MEETINGS].sort((a,b)=>(b.date||'').localeCompare(a.date||''))[0];
+    openMeetingId = mostRecent.id;
+  }
+  if(openMeetingId && !meetingOf(openMeetingId)) openMeetingId = null;
+  showSelectedMeetingSection();
+}
+
+/* ---- selected meeting (always-visible, stacked below the list) ---- */
+function showSelectedMeetingSection(){
+  if(!openMeetingId){
+    document.getElementById('mnNoSelection').style.display = 'block';
+    document.getElementById('mnSelectedMeeting').style.display = 'none';
+    return;
+  }
+  document.getElementById('mnNoSelection').style.display = 'none';
+  document.getElementById('mnSelectedMeeting').style.display = 'block';
+  renderMeetingDetail();
+}
+function selectMeeting(id, scrollToDetail){
+  openMeetingId = id;
+  showSelectedMeetingSection();
+  if(scrollToDetail){
+    setTimeout(() => {
+      const el = document.getElementById('mnSelectedMeeting');
+      if(el) el.scrollIntoView({ behavior:'smooth', block:'start' });
+    }, 30);
+  }
+}
+
+function renderMeetingDetail(){
+  const m = meetingOf(openMeetingId);
+  if(!m){ openMeetingId = null; showSelectedMeetingSection(); return; }
+  document.getElementById('mnDetailTitle').textContent = m.title;
+  document.getElementById('mnDetailMeta').textContent = [formatDate(m.date), m.time, m.withWhom, m.mode].filter(Boolean).join(' · ');
+  document.getElementById('mnMomSummary').value = m.momSummary||'';
+
+  const pts = pointsFor(m.id);
+  const ptsContainer = document.getElementById('mnPointsList');
+  ptsContainer.innerHTML = pts.length ? pts.map(p => `
+    <div style="padding:10px 0; border-bottom:1px solid var(--line);">
+      <div style="display:flex; align-items:flex-start; gap:10px;">
+        <input type="checkbox" class="mn-point-toggle" data-id="${p.id}" ${p.done?'checked':''} style="width:16px; height:16px; margin-top:2px;">
+        <div style="flex:1; font-size:13px; ${p.done?'color:var(--muted); text-decoration:line-through;':''}">${escapeHtml(p.text)}</div>
+        <button class="icon-btn" data-action="delete-point" data-id="${p.id}" title="Remove">${ICONS.trash}</button>
+      </div>
+      <textarea class="mn-point-notes" data-id="${p.id}" placeholder="Notes on this point — what was actually said or decided…" style="margin-top:6px; margin-left:26px; width:calc(100% - 26px); min-height:40px; padding:7px 9px; border:1px solid var(--line); border-radius:6px; font-family:inherit; font-size:12px;">${escapeHtml(p.notes||'')}</textarea>
+    </div>
+  `).join('') : '<div class="field-hint">No points added yet.</div>';
+  ptsContainer.querySelectorAll('.mn-point-toggle').forEach(cb => cb.addEventListener('change', (e) => {
+    const p = MEETING_POINTS.find(x=>x.id===e.target.dataset.id);
+    if(p){ p.done = e.target.checked; saveArr(K.meetingPoints, MEETING_POINTS); renderMeetingDetail(); }
+  }));
+  ptsContainer.querySelectorAll('.mn-point-notes').forEach(ta => ta.addEventListener('blur', (e) => {
+    const p = MEETING_POINTS.find(x=>x.id===e.target.dataset.id);
+    if(p){ p.notes = e.target.value.trim(); saveArr(K.meetingPoints, MEETING_POINTS); }
+  }));
+  ptsContainer.querySelectorAll('[data-action="delete-point"]').forEach(b => b.addEventListener('click', () => {
+    MEETING_POINTS = MEETING_POINTS.filter(p=>p.id!==b.dataset.id);
+    saveArr(K.meetingPoints, MEETING_POINTS);
+    renderMeetingDetail(); renderMeetingStats();
+  }));
+
+  const acts = actionsFor(m.id);
+  const actsContainer = document.getElementById('mnActionsList');
+  actsContainer.innerHTML = acts.length ? acts.map(a => `
+    <div style="display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line);">
+      <input type="checkbox" class="mn-action-toggle" data-id="${a.id}" ${a.done?'checked':''} style="width:16px; height:16px;">
+      <div style="flex:1;">
+        <div style="font-size:13px; ${a.done?'color:var(--muted); text-decoration:line-through;':''}">${escapeHtml(a.text)}</div>
+        <div class="sub-line">${escapeHtml(a.owner||'')}${a.owner&&a.dueDate?' · ':''}${a.dueDate?('Due '+formatDate(a.dueDate)):''}</div>
+      </div>
+      <button class="icon-btn" data-action="delete-action" data-id="${a.id}" title="Remove">${ICONS.trash}</button>
+    </div>
+  `).join('') : '<div class="field-hint">No action items yet.</div>';
+  actsContainer.querySelectorAll('.mn-action-toggle').forEach(cb => cb.addEventListener('change', (e) => {
+    const a = MEETING_ACTIONS.find(x=>x.id===e.target.dataset.id);
+    if(a){ a.done = e.target.checked; saveArr(K.meetingActions, MEETING_ACTIONS); renderMeetingDetail(); renderMeetingStats(); }
+  }));
+  actsContainer.querySelectorAll('[data-action="delete-action"]').forEach(b => b.addEventListener('click', () => {
+    MEETING_ACTIONS = MEETING_ACTIONS.filter(a=>a.id!==b.dataset.id);
+    saveArr(K.meetingActions, MEETING_ACTIONS);
+    renderMeetingDetail(); renderMeetingStats();
+  }));
+}
+
+document.getElementById('mnAddPointBtn').addEventListener('click', () => {
+  const input = document.getElementById('mnNewPointInput');
+  const text = input.value.trim();
+  if(!text || !openMeetingId) return;
+  MEETING_POINTS.push({ id: uid('PT'), meetingId: openMeetingId, text, notes:'', done:false });
+  saveArr(K.meetingPoints, MEETING_POINTS);
+  input.value = '';
+  renderMeetingDetail(); renderMeetingStats();
+});
+document.getElementById('mnNewPointInput').addEventListener('keydown', (e) => { if(e.key==='Enter') document.getElementById('mnAddPointBtn').click(); });
+
+document.getElementById('mnAddActionBtn').addEventListener('click', () => {
+  const textEl = document.getElementById('mnNewActionText');
+  const text = textEl.value.trim();
+  if(!text || !openMeetingId) return;
+  const owner = document.getElementById('mnNewActionOwner').value.trim();
+  const dueDate = document.getElementById('mnNewActionDue').value;
+  MEETING_ACTIONS.push({ id: uid('AC'), meetingId: openMeetingId, text, owner, dueDate, done:false });
+  saveArr(K.meetingActions, MEETING_ACTIONS);
+  textEl.value = ''; document.getElementById('mnNewActionOwner').value = ''; document.getElementById('mnNewActionDue').value = '';
+  renderMeetingDetail(); renderMeetingStats();
+});
+
+document.getElementById('mnMomSummary').addEventListener('blur', () => {
+  const m = meetingOf(openMeetingId);
+  if(m){ m.momSummary = document.getElementById('mnMomSummary').value.trim(); saveArr(K.meetings, MEETINGS); }
+});
+
+/* ---- meeting basic-info panel ---- */
+function openMeetingPanel(id){
+  const isEdit = !!id;
+  document.getElementById('meetingPanelTitle').textContent = isEdit ? 'Edit meeting' : 'New meeting';
+  document.getElementById('deleteMeetingBtn').style.display = isEdit ? 'block' : 'none';
+  const m = isEdit ? MEETINGS.find(x=>x.id===id) : null;
+
+  document.getElementById('mtId').value = m ? m.id : '';
+  document.getElementById('mtTitle').value = m ? m.title : '';
+  document.getElementById('mtWithWhom').value = m ? (m.withWhom||'') : '';
+  document.getElementById('mtDate').value = m ? m.date : todayISO();
+  document.getElementById('mtTime').value = m ? (m.time||'') : '';
+  document.getElementById('mtMode').value = m ? (m.mode||'In-person') : 'In-person';
+  document.getElementById('mtStatus').value = m ? (m.status||'Scheduled') : 'Scheduled';
+
+  openPanel('meetingPanel');
+  document.getElementById('mtTitle').focus();
+}
+document.getElementById('addMeetingBtn').addEventListener('click', () => openMeetingPanel(null));
+document.getElementById('mnEditMeetingBtn').addEventListener('click', () => openMeetingPanel(openMeetingId));
+
+document.getElementById('saveMeetingBtn').addEventListener('click', () => {
+  const id = document.getElementById('mtId').value;
+  const title = document.getElementById('mtTitle').value.trim();
+  if(!title){ alert('Title is required.'); return; }
+  const data = {
+    title,
+    withWhom: document.getElementById('mtWithWhom').value.trim(),
+    date: document.getElementById('mtDate').value || todayISO(),
+    time: document.getElementById('mtTime').value,
+    mode: document.getElementById('mtMode').value,
+    status: document.getElementById('mtStatus').value,
+  };
+  if(id){ const idx = MEETINGS.findIndex(x=>x.id===id); if(idx>-1) MEETINGS[idx] = { ...MEETINGS[idx], ...data }; }
+  else{ const created = { id: uid('MT'), momSummary:'', ...data }; MEETINGS.push(created); openMeetingId = created.id; }
+  saveArr(K.meetings, MEETINGS);
+  closeAllPanels();
+  renderMeetingsAll();
+});
+document.getElementById('deleteMeetingBtn').addEventListener('click', () => {
+  const id = document.getElementById('mtId').value;
+  if(id && confirm('Delete this meeting, its discussion points, and action items?')){
+    MEETING_POINTS = MEETING_POINTS.filter(p=>p.meetingId!==id);
+    MEETING_ACTIONS = MEETING_ACTIONS.filter(a=>a.meetingId!==id);
+    MEETINGS = MEETINGS.filter(m=>m.id!==id);
+    saveArr(K.meetings, MEETINGS); saveArr(K.meetingPoints, MEETING_POINTS); saveArr(K.meetingActions, MEETING_ACTIONS);
+    if(openMeetingId === id) openMeetingId = null;
+    closeAllPanels();
+    renderMeetingsAll();
+  }
+});
+
+document.getElementById('meetingSearchBox').addEventListener('input', e => { meetingFilters.search = e.target.value; renderMeetingTable(); });
+document.getElementById('meetingStatusFilter').addEventListener('change', e => { meetingFilters.status = e.target.value; renderMeetingTable(); });
+document.getElementById('clearMeetingFiltersBtn').addEventListener('click', () => {
+  meetingFilters = { search:'', status:'all' };
+  document.getElementById('meetingSearchBox').value=''; document.getElementById('meetingStatusFilter').value='all';
+  renderMeetingTable();
+});
+
+document.getElementById('exportMeetingActionsBtn').addEventListener('click', () => {
+  const rows = MEETING_ACTIONS.map(a => { const m = meetingOf(a.meetingId); return {
+    'Meeting': m?m.title:'', 'Meeting Date': m?m.date:'', 'Action Item': a.text, 'Owner': a.owner||'', 'Due Date': a.dueDate||'', 'Done': a.done?'Yes':'No',
+  }; });
+  downloadWorkbook(rows, 'Action Items', COMPANY_LABEL.replace(/[^a-z0-9]+/gi,'_') + '_MeetingActionItems');
+});
+
+document.getElementById('mnPrintBtn').addEventListener('click', () => {
+  const m = meetingOf(openMeetingId);
+  if(!m) return;
+  const pts = pointsFor(m.id);
+  const acts = actionsFor(m.id);
+  const w = window.open('', '_blank');
+  w.document.write(`
+    <html><head><title>Minutes — ${escapeHtml(m.title)}</title>
+    <style>
+      body{ font-family: Georgia, serif; max-width:760px; margin:0 auto; padding:40px; color:#222; }
+      h1{ margin-bottom:4px; } h2{ margin-top:26px; }
+      .meta{ color:#555; margin-bottom:20px; }
+      table{ width:100%; border-collapse:collapse; }
+      th,td{ border-bottom:1px solid #ccc; padding:6px 4px; text-align:left; font-size:13px; }
+      th{ border-bottom:2px solid #333; }
+      .actions{ margin-top:30px; text-align:center; }
+      .actions button{ padding:10px 16px; border-radius:6px; border:1px solid #1B2430; background:#1B2430; color:#fff; font-size:13px; cursor:pointer; }
+      @media print{ .actions{ display:none; } }
+    </style></head><body>
+      <h1>${escapeHtml(m.title)}</h1>
+      <div class="meta">${formatDate(m.date)}${m.time?' · '+escapeHtml(m.time):''}${m.withWhom?' · With: '+escapeHtml(m.withWhom):''}${m.mode?' · '+escapeHtml(m.mode):''}</div>
+      <h2>Discussion Points</h2>
+      <ul>${pts.map(p=>`<li>${escapeHtml(p.text)}${p.done?' ✓':''}${p.notes?('<br><span style="color:#666;font-size:12px;">'+escapeHtml(p.notes)+'</span>'):''}</li>`).join('') || '<li style="color:#888;">None logged.</li>'}</ul>
+      <h2>Minutes of Meeting</h2>
+      <p>${m.momSummary ? escapeHtml(m.momSummary).replace(/\n/g,'<br>') : '<span style="color:#888;">No summary written.</span>'}</p>
+      <h2>Action Items</h2>
+      <table>
+        <tr><th>Item</th><th>Owner</th><th>Due</th><th>Status</th></tr>
+        ${acts.map(a=>`<tr><td>${escapeHtml(a.text)}</td><td>${escapeHtml(a.owner||'')}</td><td>${a.dueDate?formatDate(a.dueDate):''}</td><td>${a.done?'Done':'Open'}</td></tr>`).join('') || '<tr><td colspan="4" style="color:#888;">None logged.</td></tr>'}
+      </table>
+      <div class="actions"><button onclick="window.print()">Print / Save as PDF</button></div>
+    </body></html>
+  `);
+  w.document.close();
 });
 
 /* ================= DATALISTS ================= */
@@ -2371,6 +2922,224 @@ document.getElementById('exportExpensesBtn').addEventListener('click', () => {
   downloadWorkbook(rows, 'Expenses', COMPANY_LABEL.replace(/[^a-z0-9]+/gi,'_') + '_Expenses');
 });
 
+/* ================= CASH VOUCHERS ================= */
+function cvItemsTotal(items){ return (items||[]).reduce((s,it) => s + (Number(it.amount)||0), 0); }
+function refreshCvNatureList(){
+  const natures = Array.from(new Set(CASH_VOUCHERS.flatMap(v => (v.items||[]).map(it=>it.nature)).filter(Boolean)));
+  document.getElementById('cvNatureList').innerHTML = natures.map(n => `<option value="${escapeHtml(n)}">`).join('');
+}
+function renderCvStats(){
+  const total = CASH_VOUCHERS.reduce((s,v) => s + cvItemsTotal(v.items), 0);
+  document.getElementById('statCvTotal').textContent = formatCurrency(total);
+  document.getElementById('statCvCount').textContent = CASH_VOUCHERS.length;
+}
+function applyCvFilters(list){
+  if(!cvSearch) return list;
+  const q = cvSearch.toLowerCase();
+  return list.filter(v => {
+    const natures = (v.items||[]).map(it=>it.nature).join(' ');
+    return (v.voucherNo+' '+(v.title||'')+' '+v.paidTo+' '+natures+' '+(v.notes||'')).toLowerCase().includes(q);
+  });
+}
+function cvItemsSummary(items){
+  items = items || [];
+  if(!items.length) return '<span class="sub-line">No entries</span>';
+  const shown = items.slice(0,3).map(it => `<div class="stack-line">${escapeHtml(it.nature||'—')} — ${formatCurrency(it.amount)}</div>`).join('');
+  const more = items.length > 3 ? `<div class="sub-line">+${items.length-3} more</div>` : '';
+  return shown + more;
+}
+function renderCvTable(){
+  const tbody = document.getElementById('cashVoucherRows');
+  const filtered = applyCvFilters(CASH_VOUCHERS).slice().sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  tbody.innerHTML = '';
+  document.getElementById('cvEmptyState').style.display = filtered.length ? 'none' : 'block';
+  filtered.forEach(v => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><div class="nametxt">${escapeHtml(v.voucherNo||'—')}</div><div class="sub-line">${formatDate(v.date)}</div>${v.title?('<div class="sub-line">'+escapeHtml(v.title)+'</div>'):''}</td>
+      <td>${escapeHtml(v.paidTo||'—')}</td>
+      <td>${cvItemsSummary(v.items)}</td>
+      <td class="num" style="font-weight:600;">${formatCurrency(cvItemsTotal(v.items))}</td>
+      <td style="max-width:200px; color:var(--muted);">${escapeHtml(truncate(v.notes,40))}</td>
+      <td><div class="row-actions">
+        <button class="icon-btn" data-action="edit" data-id="${v.id}" title="Edit">${ICONS.edit}</button>
+        <button class="icon-btn" data-action="delete" data-id="${v.id}" title="Delete">${ICONS.trash}</button>
+      </div></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  tbody.querySelectorAll('[data-action="edit"]').forEach(b => b.addEventListener('click', ()=>openCashVoucherPanel(b.dataset.id)));
+  tbody.querySelectorAll('[data-action="delete"]').forEach(b => b.addEventListener('click', ()=>{
+    if(confirm('Delete this cash voucher?')){
+      CASH_VOUCHERS = CASH_VOUCHERS.filter(x=>x.id!==b.dataset.id);
+      saveArr(K.cashVouchers, CASH_VOUCHERS);
+      renderCashVouchersAll();
+    }
+  }));
+}
+function renderCashVouchersAll(){ renderCvStats(); renderCvTable(); refreshCvNatureList(); }
+
+/* ---- cash voucher line entries ---- */
+function addCvItemRow(item){
+  const container = document.getElementById('cvItemsContainer');
+  const row = document.createElement('div');
+  row.className = 'item-row';
+  row.style.cssText = 'border:1px solid var(--line); border-radius:8px; padding:12px 14px; margin-bottom:10px; background:#fff;';
+  const inputStyle = 'width:100%; padding:8px 10px; border-radius:6px; border:1px solid var(--line); font-size:12.5px; font-family:inherit;';
+  row.innerHTML = `
+    <div class="field-row">
+      <input type="text" class="cvi-nature" list="cvNatureList" placeholder="Nature of expense" value="${escapeHtml((item&&item.nature)||'')}" style="${inputStyle} flex:2;">
+      <input type="number" class="cvi-amount" placeholder="Amount ₹" value="${item&&item.amount!=null?item.amount:''}" style="${inputStyle} flex:1;">
+      <button type="button" class="cf-remove cvi-remove-btn" title="Remove">&times;</button>
+    </div>
+  `;
+  row.querySelector('.cvi-remove-btn').addEventListener('click', () => { row.remove(); recalcCvTotal(); });
+  row.querySelectorAll('.cvi-amount').forEach(inp => {
+    inp.addEventListener('input', recalcCvTotal);
+    inp.addEventListener('change', recalcCvTotal);
+  });
+  container.appendChild(row);
+  recalcCvTotal();
+}
+function readCvItemRows(){
+  const rows = document.querySelectorAll('#cvItemsContainer .item-row');
+  const items = [];
+  rows.forEach(row => {
+    const nature = row.querySelector('.cvi-nature').value.trim();
+    const amount = Number(row.querySelector('.cvi-amount').value)||0;
+    if(!nature && amount <= 0) return;
+    items.push({ nature, amount });
+  });
+  return items;
+}
+function recalcCvTotal(){
+  const rows = document.querySelectorAll('#cvItemsContainer .item-row');
+  let total = 0;
+  rows.forEach(row => { total += Number(row.querySelector('.cvi-amount').value)||0; });
+  document.getElementById('cvPvTotal').textContent = formatCurrency(total);
+}
+document.getElementById('cvAddItemBtn').addEventListener('click', () => addCvItemRow(null));
+
+function openCashVoucherPanel(id){
+  const isEdit = !!id;
+  document.getElementById('cvPanelTitle').textContent = isEdit ? 'Edit voucher' : 'Add voucher';
+  document.getElementById('deleteCashVoucherBtn').style.display = isEdit ? 'block' : 'none';
+  const v = isEdit ? CASH_VOUCHERS.find(x=>x.id===id) : null;
+
+  document.getElementById('cvId').value = v ? v.id : '';
+  document.getElementById('cvTitle').value = v ? (v.title||'') : '';
+  document.getElementById('cvNo').value = v ? v.voucherNo : nextCvNo();
+  document.getElementById('cvDate').value = v ? v.date : todayISO();
+  document.getElementById('cvPaidTo').value = v ? (v.paidTo||'') : '';
+  document.getElementById('cvNotes').value = v ? (v.notes||'') : '';
+
+  document.getElementById('cvItemsContainer').innerHTML = '';
+  const items = (v && v.items && v.items.length) ? v.items : [null];
+  items.forEach(it => addCvItemRow(it));
+
+  openPanel('cashVoucherPanel');
+  document.getElementById('cvPaidTo').focus();
+}
+document.getElementById('addCashVoucherBtn').addEventListener('click', () => openCashVoucherPanel(null));
+
+document.getElementById('saveCashVoucherBtn').addEventListener('click', () => {
+  const id = document.getElementById('cvId').value;
+  const paidTo = document.getElementById('cvPaidTo').value.trim();
+  if(!paidTo){ alert('Paid to is required.'); return; }
+  const items = readCvItemRows();
+  if(!items.length){ alert('Add at least one entry.'); return; }
+  const data = {
+    title: document.getElementById('cvTitle').value.trim(),
+    voucherNo: document.getElementById('cvNo').value.trim() || nextCvNo(),
+    date: document.getElementById('cvDate').value || todayISO(),
+    paidTo,
+    items,
+    notes: document.getElementById('cvNotes').value.trim(),
+  };
+  if(id){ const idx = CASH_VOUCHERS.findIndex(x=>x.id===id); if(idx>-1) CASH_VOUCHERS[idx] = { ...CASH_VOUCHERS[idx], ...data }; }
+  else{ CASH_VOUCHERS.push({ id: uid('CV'), ...data }); }
+  saveArr(K.cashVouchers, CASH_VOUCHERS);
+  closeAllPanels();
+  renderCashVouchersAll();
+});
+document.getElementById('deleteCashVoucherBtn').addEventListener('click', () => {
+  const id = document.getElementById('cvId').value;
+  if(id && confirm('Delete this cash voucher?')){
+    CASH_VOUCHERS = CASH_VOUCHERS.filter(x=>x.id!==id);
+    saveArr(K.cashVouchers, CASH_VOUCHERS);
+    closeAllPanels();
+    renderCashVouchersAll();
+  }
+});
+document.getElementById('cvSearchBox').addEventListener('input', e => { cvSearch = e.target.value; renderCvTable(); });
+document.getElementById('clearCvFiltersBtn').addEventListener('click', () => { cvSearch=''; document.getElementById('cvSearchBox').value=''; renderCvTable(); });
+document.getElementById('exportCashVouchersBtn').addEventListener('click', () => {
+  const rows = [];
+  CASH_VOUCHERS.forEach(v => {
+    const items = (v.items && v.items.length) ? v.items : [{}];
+    items.forEach(it => {
+      rows.push({ 'Voucher No': v.voucherNo, 'Title': v.title||'', 'Date': v.date, 'Paid To': v.paidTo, 'Nature of Expense': it.nature||'', 'Entry Amount': it.amount||0, 'Voucher Total': cvItemsTotal(v.items), 'Notes': v.notes });
+    });
+  });
+  downloadWorkbook(rows, 'Cash Vouchers', COMPANY_LABEL.replace(/[^a-z0-9]+/gi,'_') + '_CashVouchers');
+});
+document.getElementById('printCashVoucherBtn').addEventListener('click', () => {
+  const paidTo = document.getElementById('cvPaidTo').value.trim();
+  const items = readCvItemRows();
+  if(!paidTo || !items.length){ alert('Fill in "Paid to" and at least one entry before printing.'); return; }
+  const title = document.getElementById('cvTitle').value.trim();
+  const voucherNo = document.getElementById('cvNo').value.trim() || nextCvNo();
+  const date = document.getElementById('cvDate').value || todayISO();
+  const notes = document.getElementById('cvNotes').value.trim();
+  const total = cvItemsTotal(items);
+  const itemRowsHtml = items.map(it => `<tr><td>${escapeHtml(it.nature||'—')}</td><td class="num">₹${(Number(it.amount)||0).toLocaleString('en-IN')}</td></tr>`).join('');
+  const w = window.open('', '_blank');
+  w.document.write(`
+    <html><head><title>Cash Voucher — ${escapeHtml(voucherNo)}</title>
+    <style>
+      body{ font-family: Georgia, serif; padding:40px; color:#1B2430; max-width:620px; margin:0 auto; }
+      h1{ font-size:20px; border-bottom:2px solid #1B2430; padding-bottom:10px; margin-bottom:4px; }
+      .company-meta{ font-size:12px; color:#666; margin-bottom:18px; }
+      h2{ font-size:15px; text-align:center; text-transform:uppercase; letter-spacing:0.08em; margin:24px 0 4px; }
+      h3{ font-size:13px; text-align:center; font-weight:normal; color:#555; margin:0 0 20px; }
+      table{ width:100%; border-collapse:collapse; margin:20px 0; }
+      td, th{ border:1px solid #ccc; padding:10px 12px; font-size:13px; text-align:left; }
+      th{ background:#f2f2f2; }
+      td.label{ background:#f2f2f2; font-weight:bold; width:170px; }
+      .num{ text-align:right; }
+      .total-row td{ font-weight:bold; background:#f7f7f7; }
+      .signatures{ display:flex; justify-content:space-between; margin-top:60px; }
+      .sig-box{ text-align:center; width:200px; }
+      .sig-line{ border-top:1px solid #333; margin-top:50px; padding-top:6px; font-size:12px; }
+      .actions{ margin-top:30px; text-align:center; }
+      .actions button{ padding:10px 16px; border-radius:6px; border:1px solid #1B2430; background:#1B2430; color:#fff; font-size:13px; cursor:pointer; }
+      @media print{ .actions{ display:none; } }
+    </style></head><body>
+      <h1>${escapeHtml(COMPANY_LABEL)}</h1>
+      <div class="company-meta">${PROFILE.address ? escapeHtml(PROFILE.address)+'<br>' : ''}${PROFILE.gstin ? ('GSTIN: '+escapeHtml(PROFILE.gstin)) : ''}</div>
+      <h2>Cash Payment Voucher</h2>
+      ${title ? `<h3>${escapeHtml(title)}</h3>` : ''}
+      <table>
+        <tr><td class="label">Voucher No.</td><td>${escapeHtml(voucherNo)}</td></tr>
+        <tr><td class="label">Date</td><td>${formatDate(date)}</td></tr>
+        <tr><td class="label">Paid to</td><td>${escapeHtml(paidTo)}</td></tr>
+      </table>
+      <table>
+        <tr><th>Nature of expense</th><th class="num">Amount (₹)</th></tr>
+        ${itemRowsHtml}
+        <tr class="total-row"><td>Total</td><td class="num">₹${total.toLocaleString('en-IN')}</td></tr>
+      </table>
+      ${notes ? `<p style="font-size:12.5px;">Notes: ${escapeHtml(notes)}</p>` : ''}
+      <div class="signatures">
+        <div class="sig-box"><div class="sig-line">Received by</div></div>
+        <div class="sig-box"><div class="sig-line">Approved by</div></div>
+      </div>
+      <div class="actions"><button onclick="window.print()">Print / Save as PDF</button></div>
+    </body></html>
+  `);
+  w.document.close();
+});
+
 /* ================= PAYMENTS ================= */
 function bankAccountLabel(key){
   if(!key) return '—';
@@ -3026,6 +3795,93 @@ document.getElementById('exportCustomersBtn').addEventListener('click', () => {
   const rows = CUSTOMERS.map(c => ({ 'Name': c.name, 'Contact Person': c.contact, 'Phone': c.phone, 'Alt. Contact Person': c.contact2, 'Alt. Phone': c.phone2, 'Email': c.email, 'GSTIN': c.gstin, 'Preferred Transport': c.transport, 'Address': c.address, 'Region': c.region, 'City': c.city, 'State': c.state, 'Pincode': c.pincode, 'Opening Balance': c.openingBalance||0, 'Total Outstanding': customerOutstanding(c), 'Payment Terms (Days)': c.paymentTerms||'', 'Notes': c.notes }));
   downloadWorkbook(rows, 'Customers', COMPANY_LABEL.replace(/[^a-z0-9]+/gi,'_') + '_Customers');
 });
+/* ---- customer Excel import (flexible header matching) ---- */
+const CUSTOMER_IMPORT_FIELD_ALIASES = {
+  name: ['name','customer name','customer','client name','client'],
+  contact: ['contact person','contact','contact name','contact person 1'],
+  phone: ['phone','mobile','phone number','contact number','mobile number'],
+  contact2: ['alt contact person','alt. contact person','alternate contact','alternate contact person','contact person 2'],
+  phone2: ['alt phone','alt. phone','alternate phone','phone 2','mobile 2'],
+  email: ['email','email address','email id'],
+  gstin: ['gstin','gst no','gst number','gst'],
+  transport: ['preferred transport','transport'],
+  address: ['address','address line','address 1'],
+  region: ['region'],
+  city: ['city'],
+  state: ['state'],
+  pincode: ['pincode','pin code','zip','postal code'],
+  openingBalance: ['opening balance'],
+  paymentTerms: ['payment terms days','payment terms','credit days','credit period'],
+  notes: ['notes','remarks','remark'],
+};
+function normalizeHeader(h){ return String(h||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(); }
+function buildHeaderMap(sampleRow){
+  const map = {};
+  const headers = Object.keys(sampleRow||{});
+  headers.forEach(h => {
+    const norm = normalizeHeader(h);
+    for(const field in CUSTOMER_IMPORT_FIELD_ALIASES){
+      if(map[field]) continue;
+      if(CUSTOMER_IMPORT_FIELD_ALIASES[field].some(alias => normalizeHeader(alias) === norm)){
+        map[field] = h;
+      }
+    }
+  });
+  return map;
+}
+document.getElementById('importCustomersBtn').addEventListener('click', () => document.getElementById('customerImportFileInput').click());
+document.getElementById('customerImportFileInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    try{
+      const data = new Uint8Array(evt.target.result);
+      const wb = XLSX.read(data, { type:'array' });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const json = XLSX.utils.sheet_to_json(sheet, { defval:'' });
+      if(!json.length){ alert('No rows found in that file.'); e.target.value=''; return; }
+      const headerMap = buildHeaderMap(json[0]);
+      if(!headerMap.name){ alert('Could not find a "Name" column in this file. Please make sure one column is named Name, Customer Name, or Customer.'); e.target.value=''; return; }
+      let added = 0, updated = 0;
+      json.forEach(row => {
+        const getVal = (field) => headerMap[field] ? String(row[headerMap[field]]||'').trim() : '';
+        const name = getVal('name');
+        if(!name) return;
+        const existing = findCustomer(name);
+        const incoming = {
+          contact: getVal('contact'), phone: getVal('phone'), contact2: getVal('contact2'), phone2: getVal('phone2'),
+          email: getVal('email'), gstin: getVal('gstin'), transport: getVal('transport'), address: getVal('address'),
+          region: getVal('region'), city: getVal('city'), state: getVal('state'), pincode: getVal('pincode'),
+          openingBalance: getVal('openingBalance') ? Number(getVal('openingBalance'))||0 : '',
+          paymentTerms: getVal('paymentTerms') ? Number(getVal('paymentTerms'))||'' : '',
+          notes: getVal('notes'),
+        };
+        if(existing){
+          let changed = false;
+          Object.keys(incoming).forEach(field => {
+            const hasExisting = existing[field] !== undefined && existing[field] !== null && existing[field] !== '';
+            const hasIncoming = incoming[field] !== undefined && incoming[field] !== null && incoming[field] !== '';
+            if(!hasExisting && hasIncoming){ existing[field] = incoming[field]; changed = true; }
+          });
+          if(changed) updated++;
+        } else {
+          CUSTOMERS.push({ id: uid('C'), name, ...incoming });
+          added++;
+        }
+      });
+      saveArr(K.customers, CUSTOMERS);
+      refreshDatalists();
+      renderCustomerTable();
+      alert(`Import complete: ${added} new customer${added===1?'':'s'} added, ${updated} existing customer${updated===1?'':'s'} filled in.`);
+    }catch(err){
+      alert('Could not read that file — make sure it is a valid .xlsx or .xls file.');
+    }
+    e.target.value = '';
+  };
+  reader.readAsArrayBuffer(file);
+});
+
 document.getElementById('exportSuppliersBtn').addEventListener('click', () => {
   const rows = SUPPLIERS.map(s => ({ 'Name': s.name, 'Contact Person': s.contact, 'Phone': s.phone, 'Alt. Contact Person': s.contact2, 'Alt. Phone': s.phone2, 'Email': s.email, 'GSTIN': s.gstin, 'Address': s.address, 'City': s.city, 'State': s.state, 'Pincode': s.pincode, 'Manufactures / Supplies': s.applicationDetails, 'Notes': s.notes }));
   downloadWorkbook(rows, 'Suppliers', COMPANY_LABEL.replace(/[^a-z0-9]+/gi,'_') + '_Suppliers');
@@ -3054,7 +3910,7 @@ document.getElementById('exportPurchasesBtn').addEventListener('click', () => {
 
 /* ================= JSON BACKUP / RESTORE ================= */
 document.getElementById('exportAllBtn').addEventListener('click', () => {
-  const payload = { company: COMPANY_LABEL, exportedAt: new Date().toISOString(), customers: CUSTOMERS, suppliers: SUPPLIERS, products: PRODUCTS, leads: LEADS, sales: SALES, purchases: PURCHASES, expenses: EXPENSES, payments: PAYMENTS, tasks: TASKS, profile: PROFILE };
+  const payload = { company: COMPANY_LABEL, exportedAt: new Date().toISOString(), customers: CUSTOMERS, suppliers: SUPPLIERS, products: PRODUCTS, leads: LEADS, sales: SALES, purchases: PURCHASES, expenses: EXPENSES, payments: PAYMENTS, tasks: TASKS, cashVouchers: CASH_VOUCHERS, meetings: MEETINGS, meetingPoints: MEETING_POINTS, meetingActions: MEETING_ACTIONS, profile: PROFILE };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -3080,12 +3936,17 @@ document.getElementById('importFileInput').addEventListener('change', (e) => {
       EXPENSES = Array.isArray(data.expenses) ? data.expenses : [];
       PAYMENTS = Array.isArray(data.payments) ? data.payments : [];
       TASKS = Array.isArray(data.tasks) ? data.tasks : [];
+      CASH_VOUCHERS = Array.isArray(data.cashVouchers) ? data.cashVouchers : [];
+      MEETINGS = Array.isArray(data.meetings) ? data.meetings : [];
+      MEETING_POINTS = Array.isArray(data.meetingPoints) ? data.meetingPoints : [];
+      MEETING_ACTIONS = Array.isArray(data.meetingActions) ? data.meetingActions : [];
       PROFILE = (data.profile && typeof data.profile === 'object') ? data.profile : defaultProfile();
-      saveArr(K.customers, CUSTOMERS); saveArr(K.suppliers, SUPPLIERS); saveArr(K.products, PRODUCTS); saveArr(K.leads, LEADS); saveArr(K.sales, SALES); saveArr(K.purchases, PURCHASES); saveArr(K.expenses, EXPENSES); saveArr(K.payments, PAYMENTS); saveArr(K.tasks, TASKS); saveObj(K.profile, PROFILE);
+      saveArr(K.customers, CUSTOMERS); saveArr(K.suppliers, SUPPLIERS); saveArr(K.products, PRODUCTS); saveArr(K.leads, LEADS); saveArr(K.sales, SALES); saveArr(K.purchases, PURCHASES); saveArr(K.expenses, EXPENSES); saveArr(K.payments, PAYMENTS); saveArr(K.tasks, TASKS); saveArr(K.cashVouchers, CASH_VOUCHERS); saveArr(K.meetings, MEETINGS); saveArr(K.meetingPoints, MEETING_POINTS); saveArr(K.meetingActions, MEETING_ACTIONS); saveObj(K.profile, PROFILE);
       recomputeAvgCosts();
       refreshDatalists();
       loadProfileForm();
-      renderLeadsAll(); renderSalesAll(); renderCustomerTable(); renderSupplierTable(); renderProductTable(); renderPurchasesAll(); renderExpensesAll(); renderPaymentsAll(); renderTasksAll();
+      openMeetingId = null;
+      renderLeadsAll(); renderSalesAll(); renderCustomerTable(); renderSupplierTable(); renderProductTable(); renderPurchasesAll(); renderExpensesAll(); renderPaymentsAll(); renderTasksAll(); renderCashVouchersAll(); renderMeetingsAll();
       alert('Data imported successfully.');
     }catch(err){ alert('Could not read this file — make sure it is a backup JSON exported from this same app.'); }
     e.target.value = '';
@@ -3107,10 +3968,12 @@ document.getElementById('dateLineTodo').textContent = document.getElementById('d
 SALES.forEach(recomputeSale); saveArr(K.sales, SALES);
 recomputeAvgCosts();
 renderTasksAll();
+renderMeetingsAll();
 renderLeadsAll();
 renderSalesAll();
 renderPurchasesAll();
 renderExpensesAll();
+renderCashVouchersAll();
 renderPaymentsAll();
 renderCustomerTable();
 renderSupplierTable();
