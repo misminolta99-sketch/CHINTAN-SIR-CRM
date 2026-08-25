@@ -195,6 +195,10 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
     Customers
   </div>
+  <div class="nav-item" data-section="customerissues">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    Customer Issues
+  </div>
   <div class="nav-item" data-section="suppliers">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
     Suppliers
@@ -579,10 +583,47 @@
     <div class="ledger">
       <div class="table-scroll">
         <table><thead><tr>
-          <th>Name</th><th>Contact</th><th>GSTIN</th><th>Preferred transport</th><th>City / State</th><th class="num">Opening balance</th><th class="num">Total outstanding</th><th>Payment terms</th><th>Notes</th><th></th>
+          <th>Name</th><th>Contact</th><th>GSTIN</th><th>KYC</th><th>Preferred transport</th><th>City / State</th><th class="num">Opening balance</th><th class="num">Total outstanding</th><th>Payment terms</th><th>Issues</th><th>Notes</th><th></th>
         </tr></thead><tbody id="customerRows"></tbody></table>
       </div>
       <div class="empty-state" id="customerEmptyState" style="display:none;">No customers yet.<div><button class="btn btn-ghost" id="clearCustomerFiltersBtn">Clear search</button></div></div>
+    </div>
+  </section>
+
+  <!-- ============ CUSTOMER ISSUES SECTION ============ -->
+  <section id="section-customerissues" style="display:none;">
+    <div class="topbar">
+      <div><div class="page-title">Customer Issues</div><div class="page-sub">Every problem a customer has faced from our side — samples, materials, delivery, or anything else — in one place.</div></div>
+      <div class="btn-group">
+        <button class="btn btn-dark" id="exportCustomerIssuesBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>Export Excel</button>
+        <button class="btn btn-primary" id="addCustomerIssueBtn">+ Add issue</button>
+      </div>
+    </div>
+    <div class="cards">
+      <div class="card"><div class="card-label">Total issues</div><div class="card-value" id="statIssueTotal">0</div></div>
+      <div class="card overdue"><div class="card-label">Open</div><div class="card-value" id="statIssueOpen">0</div></div>
+      <div class="card upcoming"><div class="card-label">Resolved</div><div class="card-value" id="statIssueResolved">0</div></div>
+    </div>
+    <div class="toolbar">
+      <input type="text" class="search" id="issueSearchBox" placeholder="Search customer, category, or description…">
+      <div class="chip-group" id="issueStatusChips">
+        <div class="chip active" data-status="all">All</div>
+        <div class="chip" data-status="Open">Open</div>
+        <div class="chip" data-status="Resolved">Resolved</div>
+      </div>
+    </div>
+    <div class="ledger">
+      <div class="table-scroll">
+        <table><thead><tr>
+          <th>Customer</th>
+          <th>Date</th>
+          <th>Category</th>
+          <th>Description</th>
+          <th>Status</th>
+          <th></th>
+        </tr></thead><tbody id="customerIssueRows"></tbody></table>
+      </div>
+      <div class="empty-state" id="customerIssueEmptyState" style="display:none;">No issues logged yet.<div><button class="btn btn-ghost" id="clearIssueFiltersBtn">Clear filters</button></div></div>
     </div>
   </section>
 
@@ -992,6 +1033,25 @@
       <div class="field"><label for="cPaymentTerms">Payment terms (credit days)</label><input type="number" id="cPaymentTerms" placeholder="e.g. 30"></div>
     </div>
     <div class="field-hint" style="margin-top:-8px; margin-bottom:14px;">Used to auto-fill the credit period whenever you create a new Sales Ledger entry for this customer.</div>
+
+    <div class="section-label">KYC</div>
+    <div class="field-row">
+      <div class="field"><label for="cPan">PAN number</label><input type="text" id="cPan" placeholder="e.g. ABCDE1234F"></div>
+      <div class="field"><label for="cKycStatus">KYC status</label>
+        <select id="cKycStatus"><option>Pending</option><option>Verified</option><option>Not Required</option></select>
+      </div>
+    </div>
+    <div id="cKycDocsList"></div>
+    <input type="file" id="cKycFileInput" accept="application/pdf,image/jpeg,image/jpg,.pdf,.jpg,.jpeg" style="margin-top:6px;">
+    <div class="field-hint" style="margin-bottom:14px;">KYC documents (PAN copy, GST certificate, etc.) — stored on this device only.</div>
+    <div class="field-row">
+      <div class="field"><label for="cRefBy">Reference given by</label><input type="text" id="cRefBy" placeholder="Name of the person who referred this customer"></div>
+      <div class="field"><label for="cRefContact">Reference contact</label><input type="text" id="cRefContact" placeholder="Phone or relation"></div>
+    </div>
+    <div class="field"><label for="cRefNotes">Reference notes</label><textarea id="cRefNotes" placeholder="What they said, how you know them…"></textarea></div>
+
+    <div class="field-hint" style="margin-bottom:10px;">Issues this customer has faced are now tracked in their own "Customer Issues" tab, not here.</div>
+
     <div class="field"><label for="cNotes">Notes</label><textarea id="cNotes"></textarea></div>
     <button class="delete-link" id="deleteCustomerBtn" style="display:none;">Delete this customer</button>
   </div>
@@ -1002,6 +1062,27 @@
 </div>
 
 <!-- ============ SUPPLIER PANEL ============ -->
+<div class="panel" id="customerIssuePanel">
+  <div class="panel-header"><div class="panel-title" id="issuePanelTitle">Add issue</div><button class="panel-close" data-close>&times;</button></div>
+  <div class="panel-body">
+    <input type="hidden" id="issueId">
+    <div class="field"><label for="issueCustomer">Customer</label><input type="text" id="issueCustomer" list="customerNameList"></div>
+    <div class="field-row">
+      <div class="field"><label for="issueDate">Date</label><input type="date" id="issueDate"></div>
+      <div class="field"><label for="issueCategory">Category</label><input type="text" id="issueCategory" list="issueCategoryList" placeholder="Sample / Material / Delivery…"></div>
+    </div>
+    <div class="field"><label for="issueDescription">Description</label><textarea id="issueDescription" style="min-height:100px;" placeholder="What happened…"></textarea></div>
+    <div class="field"><label for="issueStatus">Status</label>
+      <select id="issueStatus"><option>Open</option><option>Resolved</option></select>
+    </div>
+    <button class="delete-link" id="deleteCustomerIssueBtn" style="display:none;">Delete this issue</button>
+  </div>
+  <div class="panel-footer">
+    <button class="btn btn-ghost" data-close>Cancel</button>
+    <button class="btn btn-primary" id="saveCustomerIssueBtn">Save issue</button>
+  </div>
+</div>
+
 <div class="panel" id="supplierPanel">
   <div class="panel-header"><div class="panel-title" id="supplierPanelTitle">Add supplier</div><button class="panel-close" data-close>&times;</button></div>
   <div class="panel-body">
@@ -1076,6 +1157,9 @@
 <datalist id="paymentModeList">
   <option value="NEFT"><option value="RTGS"><option value="Cheque"><option value="Cash"><option value="UPI">
 </datalist>
+<datalist id="issueCategoryList">
+  <option value="Sample"><option value="Material Quality"><option value="Delivery"><option value="Billing"><option value="Communication"><option value="Other">
+</datalist>
 <datalist id="cvNatureList"></datalist>
 <datalist id="expenseCategoryList">
   <option value="Rent"><option value="Salaries"><option value="Transport"><option value="Utilities">
@@ -1107,6 +1191,7 @@ const K = {
   meetings: COMPANY_ID + '_meetings_v1',
   meetingPoints: COMPANY_ID + '_meeting_points_v1',
   meetingActions: COMPANY_ID + '_meeting_actions_v1',
+  customerIssues: COMPANY_ID + '_customer_issues_v1',
   leadSeq: COMPANY_ID + '_lead_seq_v1',
   profile: COMPANY_ID + '_profile_v1',
 };
@@ -1281,6 +1366,19 @@ let MEETINGS = loadArr(K.meetings, seedMeetings);
 MEETINGS = migrateOldMeetingNotes(MEETINGS);
 let MEETING_POINTS = loadArr(K.meetingPoints, seedMeetingPointsData);
 let MEETING_ACTIONS = loadArr(K.meetingActions, seedMeetingActionsData);
+function seedCustomerIssues(){ return []; }
+let CUSTOMER_ISSUES = loadArr(K.customerIssues, seedCustomerIssues);
+(function migrateOldCustomerIssues(){
+  let changed = false;
+  CUSTOMERS.forEach(c => {
+    if(c.issues && c.issues.length){
+      c.issues.forEach(i => { CUSTOMER_ISSUES.push({ id: uid('CI'), customer: c.name, date: i.date||todayISO(), category: i.category||'', description: i.description||'', status: i.status||'Open' }); });
+      delete c.issues;
+      changed = true;
+    }
+  });
+  if(changed){ saveArr(K.customerIssues, CUSTOMER_ISSUES); saveArr(K.customers, CUSTOMERS); }
+})();
 let PROFILE = loadObj(K.profile, defaultProfile);
 
 let leadFilters = { search:'', stage:'all', urgency:'all' };
@@ -1292,6 +1390,7 @@ let taskFilters = { search:'', urgency:'all' };
 let cvSearch = '';
 let meetingFilters = { search:'', status:'all' };
 let openMeetingId = null;
+let issueFilters = { search:'', status:'all' };
 let customerSearch = '';
 let supplierSearch = '';
 let productSearch = '';
@@ -1391,6 +1490,7 @@ function refreshSection(sectionKey){
     expenses: renderExpensesAll,
     cashvouchers: renderCashVouchersAll,
     customers: renderCustomerTable,
+    customerissues: renderCustomerIssuesAll,
     suppliers: renderSupplierTable,
     products: renderProductTable,
   };
@@ -1879,6 +1979,14 @@ function customerOutstanding(customer){
     .reduce((sum, p) => sum + (Number(p.amount)||0) + (Number(p.discount)||0), 0);
   return opening + invoiceNet - paymentsTotal;
 }
+function customerIssuesBadge(c){
+  const issues = CUSTOMER_ISSUES.filter(i => i.customer.trim().toLowerCase() === c.name.trim().toLowerCase());
+  if(!issues.length) return '<span class="sub-line">—</span>';
+  const open = issues.filter(i => i.status === 'Open').length;
+  if(open) return `<span class="badge status-overdue">${open} open</span>`;
+  return `<span class="badge status-cleared">${issues.length} resolved</span>`;
+}
+
 function findProduct(name){ if(!name) return null; return PRODUCTS.find(p => p.name.trim().toLowerCase() === name.trim().toLowerCase()); }
 function upsertCustomerFromEntry(name, contact, phone, email, transport){
   if(!name) return;
@@ -2025,7 +2133,9 @@ function sortLeadsList(list){ const rank = { overdue:0, today:1, upcoming:2, don
 const ICONS = {
   edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
   trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>',
-  statement: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>'
+  statement: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>',
+  chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
+  alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
 };
 const statusBadgeClass = { 'Order Received':'stage-Won', 'Under Negotiation':'stage-Negotiation', 'Pending':'stage-New', 'Lost':'stage-Lost' };
 
@@ -2340,6 +2450,37 @@ document.getElementById('pFileInput').addEventListener('change', async (e) => {
   }catch(err){ alert('Could not save the attachment on this device.'); }
 });
 
+async function getAttachmentsForCustomer(customerId){ const db = await openAttachDB(); return new Promise((res,rej)=>{ const tx=db.transaction('files','readonly'); const req=tx.objectStore('files').getAll(); req.onsuccess=()=>res((req.result||[]).filter(r=>r.customerId===customerId)); req.onerror=()=>rej(req.error); }); }
+async function renderCustomerKycDocsList(customerId){
+  const container = document.getElementById('cKycDocsList');
+  container.innerHTML = '<div class="field-hint">Loading…</div>';
+  if(!customerId){ container.innerHTML = '<div class="field-hint">Save the customer first, then attach KYC documents.</div>'; return; }
+  try{
+    const files = await getAttachmentsForCustomer(customerId);
+    if(!files.length){ container.innerHTML = '<div class="field-hint">No KYC documents attached yet.</div>'; return; }
+    container.innerHTML = '';
+    files.forEach(f => {
+      const row = document.createElement('div');
+      row.className = 'attach-row';
+      row.innerHTML = `<span class="fname">${escapeHtml(f.filename)}</span><div class="attach-actions"><button type="button" class="icon-btn" data-view="${f.id}" title="View / download">⬇</button><button type="button" class="icon-btn" data-del="${f.id}" title="Remove">${ICONS.trash}</button></div>`;
+      row.querySelector('[data-view]').addEventListener('click', () => { const url = URL.createObjectURL(f.blob); const a = document.createElement('a'); a.href=url; a.download=f.filename; a.click(); setTimeout(()=>URL.revokeObjectURL(url), 5000); });
+      row.querySelector('[data-del]').addEventListener('click', async () => { if(confirm('Remove this document?')){ await deleteAttachment(f.id); renderCustomerKycDocsList(customerId); } });
+      container.appendChild(row);
+    });
+  }catch(e){ container.innerHTML = '<div class="field-hint">Could not load attachments (your browser may be blocking local storage for this file).</div>'; }
+}
+document.getElementById('cKycFileInput').addEventListener('change', async (e) => {
+  const customerId = document.getElementById('customerId').value;
+  if(!customerId){ alert('Save the customer first, then attach KYC documents.'); e.target.value=''; return; }
+  const file = e.target.files[0];
+  if(!file) return;
+  try{
+    await saveAttachment({ id: uid('ATT'), customerId, filename: file.name, blob: file, addedDate: todayISO() });
+    e.target.value = '';
+    renderCustomerKycDocsList(customerId);
+  }catch(err){ alert('Could not save the attachment on this device.'); }
+});
+
 /* ---- lead panel open/close ---- */
 function openLeadPanel(id){
   const isEdit = !!id;
@@ -2487,6 +2628,10 @@ function openCustomerLedger(customerId){
         <tr class="total-row"><td colspan="3">Closing balance</td><td class="num">₹${closing.toLocaleString('en-IN')}</td></tr>
       </table>
       <p style="font-size:11px;color:#888;">Debit = amount owed by customer (opening balance, invoices). Credit = amount received — whether entered against a specific invoice in Sales Ledger, or logged independently in Payments.</p>
+      ${(c.refBy || c.refNotes) ? `
+      <h2 style="font-size:14px; margin-top:26px;">Reference</h2>
+      <p style="font-size:12.5px;">${c.refBy?('Given by: '+escapeHtml(c.refBy)):''}${c.refContact?(' ('+escapeHtml(c.refContact)+')'):''}${c.refNotes?('<br>'+escapeHtml(c.refNotes)):''}</p>
+      ` : ''}
       <div class="actions">
         <button onclick="window.print()">Print / Save as PDF</button>
         <a href="mailto:${encodeURIComponent(c.email||'')}?subject=${encodeURIComponent('Statement of account — '+COMPANY_LABEL)}">Share via Email</a>
@@ -2494,6 +2639,73 @@ function openCustomerLedger(customerId){
     </body></html>
   `);
   w.document.close();
+}
+
+/* ---- product <-> customer cross-reference reports ---- */
+function openReportWindow(title, subtitle, rowsHtml, headHtml){
+  const w = window.open('', '_blank');
+  w.document.write(`
+    <html><head><title>${escapeHtml(title)}</title>
+    <style>
+      body{ font-family: Georgia, serif; padding:40px; color:#1B2430; max-width:760px; margin:0 auto; }
+      h1{ font-size:20px; border-bottom:2px solid #1B2430; padding-bottom:10px; margin-bottom:4px; }
+      .meta{ font-size:13px; color:#555; margin-bottom:20px; }
+      table{ width:100%; border-collapse:collapse; margin:16px 0; }
+      th,td{ border:1px solid #ccc; padding:8px 10px; font-size:12.5px; text-align:left; }
+      th{ background:#f2f2f2; }
+      .num{ text-align:right; }
+      .total-row td{ font-weight:bold; background:#f7f7f7; }
+      .actions{ margin-top:26px; text-align:center; }
+      .actions button{ padding:10px 16px; border-radius:6px; border:1px solid #1B2430; background:#1B2430; color:#fff; font-size:13px; cursor:pointer; }
+      @media print{ .actions{ display:none; } }
+    </style></head><body>
+      <h1>${escapeHtml(COMPANY_LABEL)}</h1>
+      <div class="meta">${escapeHtml(subtitle)}</div>
+      <table><tr>${headHtml}</tr>${rowsHtml}</table>
+      <div class="actions"><button onclick="window.print()">Print / Save as PDF</button></div>
+    </body></html>
+  `);
+  w.document.close();
+}
+function openProductBuyersReport(productId){
+  const p = PRODUCTS.find(x=>x.id===productId);
+  if(!p) return;
+  SALES.forEach(recomputeSale);
+  const key = p.name.trim().toLowerCase();
+  const byCustomer = {};
+  SALES.forEach(s => {
+    (s.items||[]).forEach(it => {
+      if((it.product||'').trim().toLowerCase() !== key) return;
+      if(!byCustomer[s.customer]) byCustomer[s.customer] = { qty:0, value:0, orders:0 };
+      byCustomer[s.customer].qty += Number(it.qty)||0;
+      byCustomer[s.customer].value += itemTotal(it).total;
+      byCustomer[s.customer].orders += 1;
+    });
+  });
+  const rows = Object.keys(byCustomer).map(name => ({ name, ...byCustomer[name] })).sort((a,b)=>b.qty-a.qty);
+  const rowsHtml = rows.length ? rows.map(r => `<tr><td>${escapeHtml(r.name)}</td><td class="num">${r.qty.toLocaleString('en-IN')}</td><td class="num">₹${Math.round(r.value).toLocaleString('en-IN')}</td><td class="num">${r.orders}</td></tr>`).join('')
+    : '<tr><td colspan="4" style="color:#888;">No sales recorded for this product yet.</td></tr>';
+  openReportWindow('Buyers — '+p.name, p.name+' — customers who have purchased this product, most to least by quantity', rowsHtml, '<th>Customer</th><th class="num">Total qty</th><th class="num">Total value (₹)</th><th class="num">Orders</th>');
+}
+function openCustomerProductsReport(customerId){
+  const c = CUSTOMERS.find(x=>x.id===customerId);
+  if(!c) return;
+  SALES.forEach(recomputeSale);
+  const key = c.name.trim().toLowerCase();
+  const byProduct = {};
+  SALES.filter(s => s.customer.trim().toLowerCase() === key).forEach(s => {
+    (s.items||[]).forEach(it => {
+      const pname = it.product || 'Unnamed product';
+      if(!byProduct[pname]) byProduct[pname] = { qty:0, value:0, orders:0 };
+      byProduct[pname].qty += Number(it.qty)||0;
+      byProduct[pname].value += itemTotal(it).total;
+      byProduct[pname].orders += 1;
+    });
+  });
+  const rows = Object.keys(byProduct).map(name => ({ name, ...byProduct[name] })).sort((a,b)=>b.qty-a.qty);
+  const rowsHtml = rows.length ? rows.map(r => `<tr><td>${escapeHtml(r.name)}</td><td class="num">${r.qty.toLocaleString('en-IN')}</td><td class="num">₹${Math.round(r.value).toLocaleString('en-IN')}</td><td class="num">${r.orders}</td></tr>`).join('')
+    : '<tr><td colspan="4" style="color:#888;">No sales recorded for this customer yet.</td></tr>';
+  openReportWindow('Products bought — '+c.name, c.name+' — products purchased, most to least by quantity', rowsHtml, '<th>Product</th><th class="num">Total qty</th><th class="num">Total value (₹)</th><th class="num">Orders</th>');
 }
 
 document.getElementById('lGenerateQuoteBtn').addEventListener('click', () => {
@@ -3400,19 +3612,24 @@ function renderCustomerTable(){
   document.getElementById('customerEmptyState').style.display = filtered.length ? 'none' : 'block';
   filtered.forEach(c => {
     const outstanding = customerOutstanding(c);
+    const kycClass = { Verified:'status-cleared', Pending:'status-today', 'Not Required':'status-upcoming' };
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="nametxt">${escapeHtml(c.name)}</td>
       <td><div class="stack-line">${escapeHtml(c.contact||'—')}</div><div class="stack-line">${escapeHtml(c.phone||'—')}</div></td>
       <td>${escapeHtml(c.gstin||'—')}</td>
+      <td><span class="badge ${kycClass[c.kycStatus]||'status-today'}">${escapeHtml(c.kycStatus||'Pending')}</span>${c.pan?('<div class="sub-line">'+escapeHtml(c.pan)+'</div>'):''}</td>
       <td>${escapeHtml(c.transport||'—')}</td>
       <td>${escapeHtml([c.city,c.state].filter(Boolean).join(', ')||'—')}</td>
       <td class="num">${formatCurrency(c.openingBalance||0)}</td>
       <td class="num" style="font-weight:600; ${outstanding>0?'color:var(--overdue);':''}">${formatCurrency(outstanding)}</td>
       <td>${c.paymentTerms ? (c.paymentTerms + ' days') : '—'}</td>
+      <td style="cursor:pointer;" data-action="issues-badge" data-id="${c.id}">${customerIssuesBadge(c)}</td>
       <td style="max-width:160px; color:var(--muted);">${escapeHtml(truncate(c.notes,40))}</td>
       <td><div class="row-actions">
         <button class="icon-btn" data-action="ledger" data-id="${c.id}" title="Customer statement">${ICONS.statement}</button>
+        <button class="icon-btn" data-action="products" data-id="${c.id}" title="Products bought">${ICONS.chart}</button>
+        <button class="icon-btn" data-action="issues" data-id="${c.id}" title="Issues statement">${ICONS.alert}</button>
         <button class="icon-btn" data-action="edit" data-id="${c.id}">${ICONS.edit}</button>
         <button class="icon-btn" data-action="delete" data-id="${c.id}">${ICONS.trash}</button>
       </div></td>
@@ -3420,6 +3637,9 @@ function renderCustomerTable(){
     tbody.appendChild(tr);
   });
   tbody.querySelectorAll('[data-action="ledger"]').forEach(b => b.addEventListener('click', ()=>openCustomerLedger(b.dataset.id)));
+  tbody.querySelectorAll('[data-action="products"]').forEach(b => b.addEventListener('click', ()=>openCustomerProductsReport(b.dataset.id)));
+  tbody.querySelectorAll('[data-action="issues"]').forEach(b => b.addEventListener('click', ()=>openCustomerIssuesStatement(b.dataset.id)));
+  tbody.querySelectorAll('[data-action="issues-badge"]').forEach(b => b.addEventListener('click', ()=>openCustomerIssuesStatement(b.dataset.id)));
   tbody.querySelectorAll('[data-action="edit"]').forEach(b => b.addEventListener('click', ()=>openCustomerPanel(b.dataset.id)));
   tbody.querySelectorAll('[data-action="delete"]').forEach(b => b.addEventListener('click', ()=>{
     if(confirm('Delete this customer? This does not delete their past leads/sales.')){
@@ -3450,7 +3670,13 @@ function openCustomerPanel(id){
   document.getElementById('cPincode').value = c ? (c.pincode||'') : '';
   document.getElementById('cOpeningBalance').value = c ? (c.openingBalance||0) : 0;
   document.getElementById('cPaymentTerms').value = c ? (c.paymentTerms||'') : '';
+  document.getElementById('cPan').value = c ? (c.pan||'') : '';
+  document.getElementById('cKycStatus').value = c ? (c.kycStatus||'Pending') : 'Pending';
+  document.getElementById('cRefBy').value = c ? (c.refBy||'') : '';
+  document.getElementById('cRefContact').value = c ? (c.refContact||'') : '';
+  document.getElementById('cRefNotes').value = c ? (c.refNotes||'') : '';
   document.getElementById('cNotes').value = c ? (c.notes||'') : '';
+  renderCustomerKycDocsList(c ? c.id : '');
   openPanel('customerPanel');
   document.getElementById('cName').focus();
 }
@@ -3475,6 +3701,11 @@ document.getElementById('saveCustomerBtn').addEventListener('click', () => {
     pincode: document.getElementById('cPincode').value.trim(),
     openingBalance: Number(document.getElementById('cOpeningBalance').value)||0,
     paymentTerms: document.getElementById('cPaymentTerms').value ? Number(document.getElementById('cPaymentTerms').value) : '',
+    pan: document.getElementById('cPan').value.trim(),
+    kycStatus: document.getElementById('cKycStatus').value,
+    refBy: document.getElementById('cRefBy').value.trim(),
+    refContact: document.getElementById('cRefContact').value.trim(),
+    refNotes: document.getElementById('cRefNotes').value.trim(),
     notes: document.getElementById('cNotes').value.trim(),
   };
   if(id){ const idx = CUSTOMERS.findIndex(x=>x.id===id); if(idx>-1) CUSTOMERS[idx] = { ...CUSTOMERS[idx], ...data }; }
@@ -3494,6 +3725,131 @@ document.getElementById('deleteCustomerBtn').addEventListener('click', () => {
 });
 document.getElementById('customerSearchBox').addEventListener('input', e => { customerSearch = e.target.value; renderCustomerTable(); });
 document.getElementById('clearCustomerFiltersBtn').addEventListener('click', () => { customerSearch=''; document.getElementById('customerSearchBox').value=''; renderCustomerTable(); });
+
+/* ================= CUSTOMER ISSUES ================= */
+function renderIssueStats(){
+  const open = CUSTOMER_ISSUES.filter(i => i.status === 'Open').length;
+  document.getElementById('statIssueTotal').textContent = CUSTOMER_ISSUES.length;
+  document.getElementById('statIssueOpen').textContent = open;
+  document.getElementById('statIssueResolved').textContent = CUSTOMER_ISSUES.length - open;
+}
+function applyIssueFilters(list){
+  return list.filter(i => {
+    if(issueFilters.status !== 'all' && i.status !== issueFilters.status) return false;
+    if(issueFilters.search){
+      const q = issueFilters.search.toLowerCase();
+      if(!(i.customer+' '+(i.category||'')+' '+(i.description||'')).toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+}
+function renderIssueTable(){
+  const tbody = document.getElementById('customerIssueRows');
+  const filtered = applyIssueFilters(CUSTOMER_ISSUES).slice().sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  tbody.innerHTML = '';
+  document.getElementById('customerIssueEmptyState').style.display = filtered.length ? 'none' : 'block';
+  filtered.forEach(i => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="nametxt">${escapeHtml(i.customer)}</td>
+      <td>${formatDate(i.date)}</td>
+      <td>${escapeHtml(i.category||'—')}</td>
+      <td style="max-width:280px; color:var(--muted);">${escapeHtml(truncate(i.description,70))}</td>
+      <td><span class="badge ${i.status==='Open'?'status-overdue':'status-cleared'}">${escapeHtml(i.status)}</span></td>
+      <td><div class="row-actions">
+        <button class="icon-btn" data-action="edit" data-id="${i.id}" title="Edit">${ICONS.edit}</button>
+        <button class="icon-btn" data-action="delete" data-id="${i.id}" title="Delete">${ICONS.trash}</button>
+      </div></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  tbody.querySelectorAll('[data-action="edit"]').forEach(b => b.addEventListener('click', ()=>openCustomerIssuePanel(b.dataset.id)));
+  tbody.querySelectorAll('[data-action="delete"]').forEach(b => b.addEventListener('click', ()=>{
+    if(confirm('Delete this issue?')){
+      CUSTOMER_ISSUES = CUSTOMER_ISSUES.filter(i=>i.id!==b.dataset.id);
+      saveArr(K.customerIssues, CUSTOMER_ISSUES);
+      renderCustomerIssuesAll();
+    }
+  }));
+}
+function renderCustomerIssuesAll(){ renderIssueStats(); renderIssueTable(); }
+
+function openCustomerIssuePanel(id){
+  const isEdit = !!id;
+  document.getElementById('issuePanelTitle').textContent = isEdit ? 'Edit issue' : 'Add issue';
+  document.getElementById('deleteCustomerIssueBtn').style.display = isEdit ? 'block' : 'none';
+  const i = isEdit ? CUSTOMER_ISSUES.find(x=>x.id===id) : null;
+
+  document.getElementById('issueId').value = i ? i.id : '';
+  document.getElementById('issueCustomer').value = i ? i.customer : '';
+  document.getElementById('issueDate').value = i ? (i.date||'') : todayISO();
+  document.getElementById('issueCategory').value = i ? (i.category||'') : '';
+  document.getElementById('issueDescription').value = i ? (i.description||'') : '';
+  document.getElementById('issueStatus').value = i ? (i.status||'Open') : 'Open';
+
+  openPanel('customerIssuePanel');
+  document.getElementById('issueCustomer').focus();
+}
+document.getElementById('addCustomerIssueBtn').addEventListener('click', () => openCustomerIssuePanel(null));
+
+document.getElementById('saveCustomerIssueBtn').addEventListener('click', () => {
+  const id = document.getElementById('issueId').value;
+  const customer = document.getElementById('issueCustomer').value.trim();
+  if(!customer){ alert('Customer is required.'); return; }
+  const data = {
+    customer,
+    date: document.getElementById('issueDate').value || todayISO(),
+    category: document.getElementById('issueCategory').value.trim(),
+    description: document.getElementById('issueDescription').value.trim(),
+    status: document.getElementById('issueStatus').value,
+  };
+  if(id){ const idx = CUSTOMER_ISSUES.findIndex(x=>x.id===id); if(idx>-1) CUSTOMER_ISSUES[idx] = { ...CUSTOMER_ISSUES[idx], ...data }; }
+  else{ CUSTOMER_ISSUES.push({ id: uid('CI'), ...data }); }
+  saveArr(K.customerIssues, CUSTOMER_ISSUES);
+  upsertCustomerFromEntry(data.customer, '', '', '', '');
+  closeAllPanels();
+  renderCustomerIssuesAll();
+  renderCustomerTable();
+});
+document.getElementById('deleteCustomerIssueBtn').addEventListener('click', () => {
+  const id = document.getElementById('issueId').value;
+  if(id && confirm('Delete this issue?')){
+    CUSTOMER_ISSUES = CUSTOMER_ISSUES.filter(i=>i.id!==id);
+    saveArr(K.customerIssues, CUSTOMER_ISSUES);
+    closeAllPanels();
+    renderCustomerIssuesAll();
+    renderCustomerTable();
+  }
+});
+document.getElementById('issueSearchBox').addEventListener('input', e => { issueFilters.search = e.target.value; renderIssueTable(); });
+document.getElementById('issueStatusChips').addEventListener('click', e => {
+  const chip = e.target.closest('.chip'); if(!chip) return;
+  document.querySelectorAll('#issueStatusChips .chip').forEach(c=>c.classList.remove('active'));
+  chip.classList.add('active'); issueFilters.status = chip.dataset.status; renderIssueTable();
+});
+document.getElementById('clearIssueFiltersBtn').addEventListener('click', () => {
+  issueFilters = { search:'', status:'all' };
+  document.getElementById('issueSearchBox').value='';
+  document.querySelectorAll('#issueStatusChips .chip').forEach(c=>c.classList.remove('active'));
+  document.querySelector('#issueStatusChips .chip[data-status="all"]').classList.add('active');
+  renderIssueTable();
+});
+document.getElementById('exportCustomerIssuesBtn').addEventListener('click', () => {
+  const rows = CUSTOMER_ISSUES.map(i => ({ 'Customer': i.customer, 'Date': i.date, 'Category': i.category, 'Description': i.description, 'Status': i.status }));
+  downloadWorkbook(rows, 'Customer Issues', COMPANY_LABEL.replace(/[^a-z0-9]+/gi,'_') + '_CustomerIssues');
+});
+
+/* ---- separate printable Issues statement per customer ---- */
+function openCustomerIssuesStatement(customerId){
+  const c = CUSTOMERS.find(x=>x.id===customerId);
+  if(!c) return;
+  const issues = CUSTOMER_ISSUES.filter(i => i.customer.trim().toLowerCase() === c.name.trim().toLowerCase())
+    .slice().sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  const rowsHtml = issues.length ? issues.map(i => `<tr><td>${formatDate(i.date)}</td><td>${escapeHtml(i.category||'—')}</td><td>${escapeHtml(i.description||'')}</td><td>${escapeHtml(i.status)}</td></tr>`).join('')
+    : '<tr><td colspan="4" style="color:#888;">No issues logged for this customer.</td></tr>';
+  openReportWindow('Issues — '+c.name, c.name+' — issues faced, most recent first', rowsHtml, '<th>Date</th><th>Category</th><th>Description</th><th>Status</th>');
+}
+
 
 /* ================= SUPPLIERS ================= */
 function renderSupplierTable(){
@@ -3638,6 +3994,7 @@ function renderProductTable(){
       <td><span class="sub-line" data-doc-count="${p.id}">…</span></td>
       <td style="max-width:140px; color:var(--muted);">${escapeHtml(truncate(p.notes,30))}</td>
       <td><div class="row-actions">
+        <button class="icon-btn" data-action="buyers" data-id="${p.id}" title="Who bought this">${ICONS.chart}</button>
         <button class="icon-btn" data-action="stock" data-id="${p.id}" title="Manual stock correction">±</button>
         <button class="icon-btn" data-action="edit" data-id="${p.id}" title="Edit">${ICONS.edit}</button>
         <button class="icon-btn" data-action="delete" data-id="${p.id}" title="Delete">${ICONS.trash}</button>
@@ -3649,6 +4006,7 @@ function renderProductTable(){
     try{ const files = await getAttachmentsForProduct(span.dataset.docCount); span.textContent = files.length ? (files.length + ' file' + (files.length>1?'s':'')) : '—'; }
     catch(e){ span.textContent = '—'; }
   });
+  tbody.querySelectorAll('[data-action="buyers"]').forEach(b => b.addEventListener('click', ()=>openProductBuyersReport(b.dataset.id)));
   tbody.querySelectorAll('[data-action="edit"]').forEach(b => b.addEventListener('click', ()=>openProductPanel(b.dataset.id)));
   tbody.querySelectorAll('[data-action="delete"]').forEach(b => b.addEventListener('click', ()=>{
     if(confirm('Delete this product?')){
@@ -3792,7 +4150,10 @@ document.getElementById('exportSalesBtn').addEventListener('click', () => {
   downloadWorkbook(rows, 'Sales Ledger', COMPANY_LABEL.replace(/[^a-z0-9]+/gi,'_') + '_SalesLedger');
 });
 document.getElementById('exportCustomersBtn').addEventListener('click', () => {
-  const rows = CUSTOMERS.map(c => ({ 'Name': c.name, 'Contact Person': c.contact, 'Phone': c.phone, 'Alt. Contact Person': c.contact2, 'Alt. Phone': c.phone2, 'Email': c.email, 'GSTIN': c.gstin, 'Preferred Transport': c.transport, 'Address': c.address, 'Region': c.region, 'City': c.city, 'State': c.state, 'Pincode': c.pincode, 'Opening Balance': c.openingBalance||0, 'Total Outstanding': customerOutstanding(c), 'Payment Terms (Days)': c.paymentTerms||'', 'Notes': c.notes }));
+  const rows = CUSTOMERS.map(c => {
+    const issues = CUSTOMER_ISSUES.filter(i => i.customer.trim().toLowerCase() === c.name.trim().toLowerCase());
+    return { 'Name': c.name, 'Contact Person': c.contact, 'Phone': c.phone, 'Alt. Contact Person': c.contact2, 'Alt. Phone': c.phone2, 'Email': c.email, 'GSTIN': c.gstin, 'PAN': c.pan||'', 'KYC Status': c.kycStatus||'Pending', 'Reference By': c.refBy||'', 'Reference Contact': c.refContact||'', 'Reference Notes': c.refNotes||'', 'Preferred Transport': c.transport, 'Address': c.address, 'Region': c.region, 'City': c.city, 'State': c.state, 'Pincode': c.pincode, 'Opening Balance': c.openingBalance||0, 'Total Outstanding': customerOutstanding(c), 'Payment Terms (Days)': c.paymentTerms||'', 'Open Issues': issues.filter(i=>i.status==='Open').length, 'Total Issues': issues.length, 'Notes': c.notes };
+  });
   downloadWorkbook(rows, 'Customers', COMPANY_LABEL.replace(/[^a-z0-9]+/gi,'_') + '_Customers');
 });
 /* ---- customer Excel import (flexible header matching) ---- */
@@ -3804,6 +4165,8 @@ const CUSTOMER_IMPORT_FIELD_ALIASES = {
   phone2: ['alt phone','alt. phone','alternate phone','phone 2','mobile 2'],
   email: ['email','email address','email id'],
   gstin: ['gstin','gst no','gst number','gst'],
+  pan: ['pan','pan number','pan no'],
+  kycStatus: ['kyc status','kyc'],
   transport: ['preferred transport','transport'],
   address: ['address','address line','address 1'],
   region: ['region'],
@@ -3851,7 +4214,7 @@ document.getElementById('customerImportFileInput').addEventListener('change', (e
         const existing = findCustomer(name);
         const incoming = {
           contact: getVal('contact'), phone: getVal('phone'), contact2: getVal('contact2'), phone2: getVal('phone2'),
-          email: getVal('email'), gstin: getVal('gstin'), transport: getVal('transport'), address: getVal('address'),
+          email: getVal('email'), gstin: getVal('gstin'), pan: getVal('pan'), kycStatus: getVal('kycStatus'), transport: getVal('transport'), address: getVal('address'),
           region: getVal('region'), city: getVal('city'), state: getVal('state'), pincode: getVal('pincode'),
           openingBalance: getVal('openingBalance') ? Number(getVal('openingBalance'))||0 : '',
           paymentTerms: getVal('paymentTerms') ? Number(getVal('paymentTerms'))||'' : '',
@@ -3910,7 +4273,7 @@ document.getElementById('exportPurchasesBtn').addEventListener('click', () => {
 
 /* ================= JSON BACKUP / RESTORE ================= */
 document.getElementById('exportAllBtn').addEventListener('click', () => {
-  const payload = { company: COMPANY_LABEL, exportedAt: new Date().toISOString(), customers: CUSTOMERS, suppliers: SUPPLIERS, products: PRODUCTS, leads: LEADS, sales: SALES, purchases: PURCHASES, expenses: EXPENSES, payments: PAYMENTS, tasks: TASKS, cashVouchers: CASH_VOUCHERS, meetings: MEETINGS, meetingPoints: MEETING_POINTS, meetingActions: MEETING_ACTIONS, profile: PROFILE };
+  const payload = { company: COMPANY_LABEL, exportedAt: new Date().toISOString(), customers: CUSTOMERS, suppliers: SUPPLIERS, products: PRODUCTS, leads: LEADS, sales: SALES, purchases: PURCHASES, expenses: EXPENSES, payments: PAYMENTS, tasks: TASKS, cashVouchers: CASH_VOUCHERS, meetings: MEETINGS, meetingPoints: MEETING_POINTS, meetingActions: MEETING_ACTIONS, customerIssues: CUSTOMER_ISSUES, profile: PROFILE };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -3940,13 +4303,14 @@ document.getElementById('importFileInput').addEventListener('change', (e) => {
       MEETINGS = Array.isArray(data.meetings) ? data.meetings : [];
       MEETING_POINTS = Array.isArray(data.meetingPoints) ? data.meetingPoints : [];
       MEETING_ACTIONS = Array.isArray(data.meetingActions) ? data.meetingActions : [];
+      CUSTOMER_ISSUES = Array.isArray(data.customerIssues) ? data.customerIssues : [];
       PROFILE = (data.profile && typeof data.profile === 'object') ? data.profile : defaultProfile();
-      saveArr(K.customers, CUSTOMERS); saveArr(K.suppliers, SUPPLIERS); saveArr(K.products, PRODUCTS); saveArr(K.leads, LEADS); saveArr(K.sales, SALES); saveArr(K.purchases, PURCHASES); saveArr(K.expenses, EXPENSES); saveArr(K.payments, PAYMENTS); saveArr(K.tasks, TASKS); saveArr(K.cashVouchers, CASH_VOUCHERS); saveArr(K.meetings, MEETINGS); saveArr(K.meetingPoints, MEETING_POINTS); saveArr(K.meetingActions, MEETING_ACTIONS); saveObj(K.profile, PROFILE);
+      saveArr(K.customers, CUSTOMERS); saveArr(K.suppliers, SUPPLIERS); saveArr(K.products, PRODUCTS); saveArr(K.leads, LEADS); saveArr(K.sales, SALES); saveArr(K.purchases, PURCHASES); saveArr(K.expenses, EXPENSES); saveArr(K.payments, PAYMENTS); saveArr(K.tasks, TASKS); saveArr(K.cashVouchers, CASH_VOUCHERS); saveArr(K.meetings, MEETINGS); saveArr(K.meetingPoints, MEETING_POINTS); saveArr(K.meetingActions, MEETING_ACTIONS); saveArr(K.customerIssues, CUSTOMER_ISSUES); saveObj(K.profile, PROFILE);
       recomputeAvgCosts();
       refreshDatalists();
       loadProfileForm();
       openMeetingId = null;
-      renderLeadsAll(); renderSalesAll(); renderCustomerTable(); renderSupplierTable(); renderProductTable(); renderPurchasesAll(); renderExpensesAll(); renderPaymentsAll(); renderTasksAll(); renderCashVouchersAll(); renderMeetingsAll();
+      renderLeadsAll(); renderSalesAll(); renderCustomerTable(); renderSupplierTable(); renderProductTable(); renderPurchasesAll(); renderExpensesAll(); renderPaymentsAll(); renderTasksAll(); renderCashVouchersAll(); renderMeetingsAll(); renderCustomerIssuesAll();
       alert('Data imported successfully.');
     }catch(err){ alert('Could not read this file — make sure it is a backup JSON exported from this same app.'); }
     e.target.value = '';
@@ -3976,6 +4340,7 @@ renderExpensesAll();
 renderCashVouchersAll();
 renderPaymentsAll();
 renderCustomerTable();
+renderCustomerIssuesAll();
 renderSupplierTable();
 renderProductTable();
 maybeFireNotification(computeDueCounts());
