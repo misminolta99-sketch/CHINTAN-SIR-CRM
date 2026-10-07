@@ -167,6 +167,10 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
     Meeting Notes
   </div>
+  <div class="nav-item" data-section="suggestions">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>
+    Suggestions
+  </div>
   <div class="nav-item" data-section="leads">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
     Leads
@@ -183,9 +187,17 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
     Purchases
   </div>
+  <div class="nav-item" data-section="supplierpayments">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+    Supplier Payments
+  </div>
   <div class="nav-item" data-section="expenses">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
     Expenses
+  </div>
+  <div class="nav-item" data-section="monthlysummary">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+    Monthly Summary
   </div>
   <div class="nav-item" data-section="cashvouchers">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12a2 2 0 0 0 2 2h14v-4"/><circle cx="16" cy="12" r="2"/></svg>
@@ -345,6 +357,53 @@
     </div>
   </section>
 
+  <!-- ============ SUGGESTIONS SECTION ============ -->
+  <section id="section-suggestions" style="display:none;">
+    <div class="topbar">
+      <div><div class="page-title">Suggestions</div><div class="page-sub">Anything you'd want to flag to the company — about a product, a customer, or an issue you've faced.</div></div>
+      <div class="btn-group">
+        <button class="btn btn-dark" id="exportSuggestionsBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>Export Excel</button>
+        <button class="btn btn-primary" id="addSuggestionBtn">+ Add suggestion</button>
+      </div>
+    </div>
+    <div class="cards">
+      <div class="card"><div class="card-label">Total suggestions</div><div class="card-value" id="statSuggTotal">0</div></div>
+      <div class="card today"><div class="card-label">New</div><div class="card-value" id="statSuggNew">0</div></div>
+      <div class="card upcoming"><div class="card-label">Implemented</div><div class="card-value" id="statSuggImplemented">0</div></div>
+    </div>
+    <div class="toolbar">
+      <input type="text" class="search" id="suggestionSearchBox" placeholder="Search suggestions, related to…">
+      <select class="stage-filter" id="suggestionCategoryFilter">
+        <option value="all">All categories</option>
+        <option value="Product">Product</option>
+        <option value="Customer">Customer</option>
+        <option value="Issue">Issue</option>
+        <option value="Process">Process</option>
+        <option value="Other">Other</option>
+      </select>
+      <div class="chip-group" id="suggestionStatusChips">
+        <div class="chip active" data-status="all">All</div>
+        <div class="chip" data-status="New">New</div>
+        <div class="chip" data-status="Reviewed">Reviewed</div>
+        <div class="chip" data-status="Implemented">Implemented</div>
+        <div class="chip" data-status="Rejected">Rejected</div>
+      </div>
+    </div>
+    <div class="ledger">
+      <div class="table-scroll">
+        <table><thead><tr>
+          <th>Date</th>
+          <th>Category</th>
+          <th>Related to</th>
+          <th>Suggestion</th>
+          <th>Status</th>
+          <th></th>
+        </tr></thead><tbody id="suggestionRows"></tbody></table>
+      </div>
+      <div class="empty-state" id="suggestionEmptyState" style="display:none;">No suggestions logged yet.<div><button class="btn btn-ghost" id="clearSuggestionFiltersBtn">Clear filters</button></div></div>
+    </div>
+  </section>
+
   <!-- ============ LEADS SECTION ============ -->
   <section id="section-leads" style="display:none;">
     <div class="topbar">
@@ -399,10 +458,13 @@
     <div class="topbar">
       <div><div class="page-title">Sales ledger &amp; receivables</div><div class="page-sub" id="dateLineSales"></div></div>
       <div class="btn-group">
+        <button class="btn btn-ghost" id="importSalesBtn">Import from Excel</button>
+        <input type="file" id="salesImportFileInput" accept=".xlsx,.xls" style="display:none;">
         <button class="btn btn-dark" id="exportSalesBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>Export Excel</button>
         <button class="btn btn-primary" id="addSaleBtn">+ Add sale entry</button>
       </div>
     </div>
+    <div class="field-hint" style="margin-bottom:14px;">Import matches column headers flexibly and groups rows by Invoice No. into multi-line entries — good for catching up after a gap. Invoice numbers already on file are skipped so you never get duplicates; re-export this sheet any time as a template.</div>
     <div class="cards">
       <div class="card"><div class="card-label">Total receivable</div><div class="card-value" id="statSaleTotal">₹0</div></div>
       <div class="card overdue"><div class="card-label">Overdue amount</div><div class="card-value" id="statSaleOverdue">₹0</div></div>
@@ -505,6 +567,39 @@
     </div>
   </section>
 
+  <!-- ============ SUPPLIER PAYMENTS SECTION ============ -->
+  <section id="section-supplierpayments" style="display:none;">
+    <div class="topbar">
+      <div><div class="page-title">Supplier Payments</div><div class="page-sub">Money paid out to suppliers — mirrors the customer Payments tab, but outward.</div></div>
+      <div class="btn-group">
+        <button class="btn btn-dark" id="exportSupplierPaymentsBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>Export Excel</button>
+        <button class="btn btn-primary" id="addSupplierPaymentBtn">+ Add payment</button>
+      </div>
+    </div>
+    <div class="cards">
+      <div class="card overdue"><div class="card-label">Total paid out</div><div class="card-value" id="statSpTotal">₹0</div></div>
+      <div class="card"><div class="card-label">Payment entries</div><div class="card-value" id="statSpCount">0</div></div>
+      <div class="card"><div class="card-label">Total discount received</div><div class="card-value" id="statSpDiscount">₹0</div></div>
+    </div>
+    <div class="toolbar"><input type="text" class="search" id="spSearchBox" placeholder="Search supplier, reference or remarks…"></div>
+    <div class="ledger">
+      <div class="table-scroll">
+        <table><thead><tr>
+          <th>Date</th>
+          <th>Supplier</th>
+          <th>Mode &amp; reference</th>
+          <th class="num">Amount</th>
+          <th class="num">Discount received</th>
+          <th>Bank account debited</th>
+          <th>Invoice ref.</th>
+          <th>Remarks</th>
+          <th></th>
+        </tr></thead><tbody id="spRows"></tbody></table>
+      </div>
+      <div class="empty-state" id="spEmptyState" style="display:none;">No payments recorded yet.<div><button class="btn btn-ghost" id="clearSpFiltersBtn">Clear search</button></div></div>
+    </div>
+  </section>
+
   <!-- ============ EXPENSES SECTION ============ -->
   <section id="section-expenses" style="display:none;">
     <div class="topbar">
@@ -535,6 +630,29 @@
         </tr></thead><tbody id="expenseRows"></tbody></table>
       </div>
       <div class="empty-state" id="expenseEmptyState" style="display:none;">No expenses recorded yet.<div><button class="btn btn-ghost" id="clearExpenseFiltersBtn">Clear search</button></div></div>
+    </div>
+  </section>
+
+  <!-- ============ MONTHLY SUMMARY SECTION ============ -->
+  <section id="section-monthlysummary" style="display:none;">
+    <div class="topbar">
+      <div><div class="page-title">Monthly Summary</div><div class="page-sub">April to March, for the Financial Year selected in the sidebar — Sales, Purchases, Receipts, Payments, Expenses and Net Profit side by side.</div></div>
+      <div class="btn-group">
+        <button class="btn btn-dark" id="exportMonthlySummaryBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>Export Excel</button>
+      </div>
+    </div>
+    <div class="ledger">
+      <div class="table-scroll">
+        <table><thead><tr>
+          <th>Month</th>
+          <th class="num">Sales</th>
+          <th class="num">Purchases</th>
+          <th class="num">Receipts</th>
+          <th class="num">Payments</th>
+          <th class="num">Expenses</th>
+          <th class="num">Net profit</th>
+        </tr></thead><tbody id="monthlySummaryRows"></tbody></table>
+      </div>
     </div>
   </section>
 
@@ -578,7 +696,7 @@
         <button class="btn btn-primary" id="addCustomerBtn">+ Add customer</button>
       </div>
     </div>
-    <div class="field-hint" style="margin-bottom:14px;">Import matches your column headers flexibly (e.g. "Customer Name", "Name", or "Customer" all work) — it adds new customers and fills in blank fields on existing ones by matching on name. It never overwrites a field that already has a value.</div>
+    <div class="field-hint" style="margin-bottom:14px;">Import matches your column headers flexibly (e.g. "Customer Name", "Name", or "Customer" all work), matching existing customers by name. Contact, address, GSTIN, PAN, KYC and reference details are synced to match the source file (so the same customer stays consistent everywhere). Opening balance and payment terms are left untouched if the customer already exists, since those can differ per company.</div>
     <div class="toolbar"><input type="text" class="search" id="customerSearchBox" placeholder="Search customers…"></div>
     <div class="ledger">
       <div class="table-scroll">
@@ -640,7 +758,7 @@
     <div class="ledger">
       <div class="table-scroll">
         <table><thead><tr>
-          <th>Name</th><th>Contact</th><th>GSTIN</th><th>City / State</th><th>Manufactures / supplies</th><th>Notes</th><th></th>
+          <th>Name</th><th>Contact</th><th>GSTIN</th><th>City / State</th><th class="num">Opening balance</th><th class="num">Payable</th><th>Manufactures / supplies</th><th>Notes</th><th></th>
         </tr></thead><tbody id="supplierRows"></tbody></table>
       </div>
       <div class="empty-state" id="supplierEmptyState" style="display:none;">No suppliers yet.<div><button class="btn btn-ghost" id="clearSupplierFiltersBtn">Clear search</button></div></div>
@@ -767,6 +885,29 @@
   <div class="panel-footer">
     <button class="btn btn-ghost" data-close>Cancel</button>
     <button class="btn btn-primary" id="saveMeetingBtn">Save meeting</button>
+  </div>
+</div>
+
+<div class="panel" id="suggestionPanel">
+  <div class="panel-header"><div class="panel-title" id="suggestionPanelTitle">Add suggestion</div><button class="panel-close" data-close>&times;</button></div>
+  <div class="panel-body">
+    <input type="hidden" id="suggId">
+    <div class="field-row">
+      <div class="field"><label for="suggDate">Date</label><input type="date" id="suggDate"></div>
+      <div class="field"><label for="suggCategory">Category</label>
+        <select id="suggCategory"><option>Product</option><option>Customer</option><option>Issue</option><option>Process</option><option>Other</option></select>
+      </div>
+    </div>
+    <div class="field"><label for="suggRelatedTo">Related to (optional)</label><input type="text" id="suggRelatedTo" list="suggestionRelatedList" placeholder="Product name, customer name, or anything else"></div>
+    <div class="field"><label for="suggText">Suggestion</label><textarea id="suggText" style="min-height:120px;" placeholder="What would you like the company to know or consider…"></textarea></div>
+    <div class="field"><label for="suggStatus">Status</label>
+      <select id="suggStatus"><option>New</option><option>Reviewed</option><option>Implemented</option><option>Rejected</option></select>
+    </div>
+    <button class="delete-link" id="deleteSuggestionBtn" style="display:none;">Delete this suggestion</button>
+  </div>
+  <div class="panel-footer">
+    <button class="btn btn-ghost" data-close>Cancel</button>
+    <button class="btn btn-primary" id="saveSuggestionBtn">Save suggestion</button>
   </div>
 </div>
 
@@ -920,6 +1061,35 @@
   <div class="panel-footer">
     <button class="btn btn-ghost" data-close>Cancel</button>
     <button class="btn btn-primary" id="savePaymentBtn">Save payment</button>
+  </div>
+</div>
+
+<div class="panel" id="spPanel">
+  <div class="panel-header"><div class="panel-title" id="spPanelTitle">Add supplier payment</div><button class="panel-close" data-close>&times;</button></div>
+  <div class="panel-body">
+    <input type="hidden" id="spId">
+    <div class="field-row">
+      <div class="field"><label for="spDate">Date</label><input type="date" id="spDate"></div>
+      <div class="field"><label for="spSupplier">Supplier</label><input type="text" id="spSupplier" list="supplierNameList"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label for="spMode">Payment mode</label><input type="text" id="spMode" list="paymentModeList" placeholder="NEFT / RTGS / Cheque / Cash / UPI"></div>
+      <div class="field"><label for="spRefNo">Reference / UTR no.</label><input type="text" id="spRefNo"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label for="spAmount">Amount paid (₹)</label><input type="number" id="spAmount" placeholder="0"></div>
+      <div class="field"><label for="spDiscount">Discount received (₹, optional)</label><input type="number" id="spDiscount" placeholder="0"></div>
+    </div>
+    <div class="field"><label for="spBankAccount">Bank account debited</label>
+      <select id="spBankAccount"><option value="">Not specified</option></select>
+    </div>
+    <div class="field"><label for="spInvoiceRef">Purchase invoice reference (optional)</label><input type="text" id="spInvoiceRef" placeholder="e.g. SUP-8821 — for your reference only"></div>
+    <div class="field"><label for="spRemarks">Remarks</label><textarea id="spRemarks"></textarea></div>
+    <button class="delete-link" id="deleteSpBtn" style="display:none;">Delete this payment</button>
+  </div>
+  <div class="panel-footer">
+    <button class="btn btn-ghost" data-close>Cancel</button>
+    <button class="btn btn-primary" id="saveSpBtn">Save payment</button>
   </div>
 </div>
 
@@ -1104,6 +1274,7 @@
       <div class="field"><label for="spState">State</label><input type="text" id="spState"></div>
     </div>
     <div class="field"><label for="spPincode">Pincode</label><input type="text" id="spPincode"></div>
+    <div class="field"><label for="spOpeningBalance">Opening balance (₹ — positive = we owe them)</label><input type="number" id="spOpeningBalance" value="0"></div>
     <div class="field"><label for="spApplication">Manufactures / supplies (application details)</label><textarea id="spApplication" placeholder="What they make or specialize in — helps you match products to pitch."></textarea></div>
     <div class="field"><label for="spNotes">Notes</label><textarea id="spNotes"></textarea></div>
     <button class="delete-link" id="deleteSupplierBtn" style="display:none;">Delete this supplier</button>
@@ -1157,6 +1328,7 @@
 <datalist id="paymentModeList">
   <option value="NEFT"><option value="RTGS"><option value="Cheque"><option value="Cash"><option value="UPI">
 </datalist>
+<datalist id="suggestionRelatedList"></datalist>
 <datalist id="issueCategoryList">
   <option value="Sample"><option value="Material Quality"><option value="Delivery"><option value="Billing"><option value="Communication"><option value="Other">
 </datalist>
@@ -1192,6 +1364,8 @@ const K = {
   meetingPoints: COMPANY_ID + '_meeting_points_v1',
   meetingActions: COMPANY_ID + '_meeting_actions_v1',
   customerIssues: COMPANY_ID + '_customer_issues_v1',
+  suggestions: COMPANY_ID + '_suggestions_v1',
+  supplierPayments: COMPANY_ID + '_supplier_payments_v1',
   leadSeq: COMPANY_ID + '_lead_seq_v1',
   profile: COMPANY_ID + '_profile_v1',
 };
@@ -1379,6 +1553,10 @@ let CUSTOMER_ISSUES = loadArr(K.customerIssues, seedCustomerIssues);
   });
   if(changed){ saveArr(K.customerIssues, CUSTOMER_ISSUES); saveArr(K.customers, CUSTOMERS); }
 })();
+function seedSuggestions(){ return []; }
+let SUGGESTIONS = loadArr(K.suggestions, seedSuggestions);
+function seedSupplierPayments(){ return []; }
+let SUPPLIER_PAYMENTS = loadArr(K.supplierPayments, seedSupplierPayments);
 let PROFILE = loadObj(K.profile, defaultProfile);
 
 let leadFilters = { search:'', stage:'all', urgency:'all' };
@@ -1386,11 +1564,13 @@ let saleFilters = { search:'', status:'all' };
 let purchaseSearch = '';
 let expenseSearch = '';
 let paymentSearch = '';
+let spSearch = '';
 let taskFilters = { search:'', urgency:'all' };
 let cvSearch = '';
 let meetingFilters = { search:'', status:'all' };
 let openMeetingId = null;
 let issueFilters = { search:'', status:'all' };
+let suggestionFilters = { search:'', category:'all', status:'all' };
 let customerSearch = '';
 let supplierSearch = '';
 let productSearch = '';
@@ -1483,6 +1663,7 @@ function refreshSection(sectionKey){
   const refreshers = {
     todo: renderTasksAll,
     meetingnotes: renderMeetingsAll,
+    suggestions: renderSuggestionsAll,
     leads: renderLeadsAll,
     sales: renderSalesAll,
     payments: renderPaymentsAll,
@@ -1493,6 +1674,8 @@ function refreshSection(sectionKey){
     customerissues: renderCustomerIssuesAll,
     suppliers: renderSupplierTable,
     products: renderProductTable,
+    supplierpayments: renderSupplierPaymentsAll,
+    monthlysummary: renderMonthlySummary,
   };
   const fn = refreshers[sectionKey];
   if(fn) fn();
@@ -1968,6 +2151,19 @@ function refreshDatalists(){
   document.getElementById('supplierNameList').innerHTML = supplierNames.map(s => `<option value="${escapeHtml(s)}">`).join('');
 }
 
+function normalizeNameForDup(name){ return String(name||'').trim().toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim(); }
+function findSimilarByName(list, name, excludeId){
+  const norm = normalizeNameForDup(name);
+  if(!norm) return null;
+  return list.find(item => item.id !== excludeId && normalizeNameForDup(item.name) === norm) || null;
+}
+function warnIfDuplicate(list, name, excludeId, kind){
+  const match = findSimilarByName(list, name, excludeId);
+  if(match){
+    return confirm('A ' + kind + ' named "' + match.name + '" already exists. Add "' + name + '" as a separate record anyway?');
+  }
+  return true;
+}
 function findCustomer(name){ if(!name) return null; return CUSTOMERS.find(c => c.name.trim().toLowerCase() === name.trim().toLowerCase()); }
 function customerOutstanding(customer){
   const nameKey = customer.name.trim().toLowerCase();
@@ -2135,7 +2331,8 @@ const ICONS = {
   trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>',
   statement: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>',
   chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
-  alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
+  alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+  convert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>'
 };
 const statusBadgeClass = { 'Order Received':'stage-Won', 'Under Negotiation':'stage-Negotiation', 'Pending':'stage-New', 'Lost':'stage-Lost' };
 
@@ -2181,12 +2378,14 @@ function renderLeadTable(){
       <td>${escapeHtml(l.transport||'—')}</td>
       <td style="max-width:200px; color:var(--muted);">${escapeHtml(truncate(l.notes,40))}<div>${cf}</div></td>
       <td><div class="row-actions">
+        ${leadIsConverted(l) ? `<button class="icon-btn" data-action="convert" data-id="${l.id}" title="Convert to Sale">${ICONS.convert}</button>` : ''}
         <button class="icon-btn" data-action="edit" data-id="${l.id}" title="Edit">${ICONS.edit}</button>
         <button class="icon-btn" data-action="delete" data-id="${l.id}" title="Delete">${ICONS.trash}</button>
       </div></td>
     `;
     tbody.appendChild(tr);
   });
+  tbody.querySelectorAll('[data-action="convert"]').forEach(b => b.addEventListener('click', ()=>convertLeadToSale(b.dataset.id)));
   tbody.querySelectorAll('[data-action="edit"]').forEach(b => b.addEventListener('click', ()=>openLeadPanel(b.dataset.id)));
   tbody.querySelectorAll('[data-action="delete"]').forEach(b => b.addEventListener('click', ()=>{
     if(confirm('Delete this lead? This cannot be undone.')){
@@ -3480,6 +3679,214 @@ document.getElementById('exportPaymentsBtn').addEventListener('click', () => {
   downloadWorkbook(rows, 'Payments', COMPANY_LABEL.replace(/[^a-z0-9]+/gi,'_') + '_Payments');
 });
 
+/* ================= SUPPLIER PAYMENTS ================= */
+function populateSpBankSelect(){
+  const sel = document.getElementById('spBankAccount');
+  const current = sel.value;
+  let html = '<option value="">Not specified</option>';
+  ['bank1','bank2','bank3'].forEach(key => {
+    const b = PROFILE[key];
+    if(b && b.bankName){ html += `<option value="${key}">${escapeHtml(bankAccountLabel(key))}</option>`; }
+  });
+  sel.innerHTML = html;
+  sel.value = current;
+}
+function renderSpStats(){
+  const base = fyFiltered(SUPPLIER_PAYMENTS, 'date');
+  const total = base.reduce((s,p) => s + (Number(p.amount)||0), 0);
+  const discount = base.reduce((s,p) => s + (Number(p.discount)||0), 0);
+  document.getElementById('statSpTotal').textContent = formatCurrency(total);
+  document.getElementById('statSpCount').textContent = base.length;
+  document.getElementById('statSpDiscount').textContent = formatCurrency(discount);
+}
+function applySpFilters(list){
+  if(!spSearch) return list;
+  const q = spSearch.toLowerCase();
+  return list.filter(p => (p.supplier+' '+(p.refNo||'')+' '+(p.remarks||'')).toLowerCase().includes(q));
+}
+function renderSpTable(){
+  const tbody = document.getElementById('spRows');
+  const filtered = applySpFilters(fyFiltered(SUPPLIER_PAYMENTS, 'date')).slice().sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  tbody.innerHTML = '';
+  document.getElementById('spEmptyState').style.display = filtered.length ? 'none' : 'block';
+  filtered.forEach(p => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${formatDate(p.date)}</td>
+      <td class="nametxt">${escapeHtml(p.supplier)}</td>
+      <td><div class="stack-line">${escapeHtml(p.mode||'—')}</div><div class="stack-line">${escapeHtml(p.refNo||'')}</div></td>
+      <td class="num" style="font-weight:600;">${formatCurrency(p.amount)}</td>
+      <td class="num">${p.discount ? formatCurrency(p.discount) : '—'}</td>
+      <td>${escapeHtml(bankAccountLabel(p.bankAccount))}</td>
+      <td>${escapeHtml(p.invoiceRef||'—')}</td>
+      <td style="max-width:180px; color:var(--muted);">${escapeHtml(truncate(p.remarks,40))}</td>
+      <td><div class="row-actions">
+        <button class="icon-btn" data-action="edit" data-id="${p.id}" title="Edit">${ICONS.edit}</button>
+        <button class="icon-btn" data-action="delete" data-id="${p.id}" title="Delete">${ICONS.trash}</button>
+      </div></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  tbody.querySelectorAll('[data-action="edit"]').forEach(b => b.addEventListener('click', ()=>openSpPanel(b.dataset.id)));
+  tbody.querySelectorAll('[data-action="delete"]').forEach(b => b.addEventListener('click', ()=>{
+    if(confirm('Delete this supplier payment entry?')){
+      SUPPLIER_PAYMENTS = SUPPLIER_PAYMENTS.filter(x=>x.id!==b.dataset.id);
+      saveArr(K.supplierPayments, SUPPLIER_PAYMENTS);
+      renderSupplierPaymentsAll();
+    }
+  }));
+}
+function renderSupplierPaymentsAll(){ renderSpStats(); renderSpTable(); }
+
+function openSpPanel(id){
+  const isEdit = !!id;
+  document.getElementById('spPanelTitle').textContent = isEdit ? 'Edit supplier payment' : 'Add supplier payment';
+  document.getElementById('deleteSpBtn').style.display = isEdit ? 'block' : 'none';
+  const p = isEdit ? SUPPLIER_PAYMENTS.find(x=>x.id===id) : null;
+
+  populateSpBankSelect();
+  document.getElementById('spId').value = p ? p.id : '';
+  document.getElementById('spDate').value = p ? p.date : todayISO();
+  document.getElementById('spSupplier').value = p ? p.supplier : '';
+  document.getElementById('spMode').value = p ? (p.mode||'') : '';
+  document.getElementById('spRefNo').value = p ? (p.refNo||'') : '';
+  document.getElementById('spAmount').value = p ? p.amount : '';
+  document.getElementById('spDiscount').value = p ? (p.discount||0) : 0;
+  document.getElementById('spBankAccount').value = p ? (p.bankAccount||'') : '';
+  document.getElementById('spInvoiceRef').value = p ? (p.invoiceRef||'') : '';
+  document.getElementById('spRemarks').value = p ? (p.remarks||'') : '';
+
+  openPanel('spPanel');
+  document.getElementById('spSupplier').focus();
+}
+document.getElementById('addSupplierPaymentBtn').addEventListener('click', () => openSpPanel(null));
+
+document.getElementById('saveSpBtn').addEventListener('click', () => {
+  const id = document.getElementById('spId').value;
+  const supplier = document.getElementById('spSupplier').value.trim();
+  if(!supplier){ alert('Supplier name is required.'); return; }
+  const amount = Number(document.getElementById('spAmount').value)||0;
+  if(amount <= 0){ alert('Amount paid must be greater than zero.'); return; }
+  const data = {
+    date: document.getElementById('spDate').value || todayISO(),
+    supplier,
+    mode: document.getElementById('spMode').value.trim(),
+    refNo: document.getElementById('spRefNo').value.trim(),
+    amount,
+    discount: Number(document.getElementById('spDiscount').value)||0,
+    bankAccount: document.getElementById('spBankAccount').value,
+    invoiceRef: document.getElementById('spInvoiceRef').value.trim(),
+    remarks: document.getElementById('spRemarks').value.trim(),
+  };
+  if(id){ const idx = SUPPLIER_PAYMENTS.findIndex(x=>x.id===id); if(idx>-1) SUPPLIER_PAYMENTS[idx] = { ...SUPPLIER_PAYMENTS[idx], ...data }; }
+  else{ SUPPLIER_PAYMENTS.push({ id: uid('SPY'), ...data }); }
+  saveArr(K.supplierPayments, SUPPLIER_PAYMENTS);
+  upsertSupplierFromEntry(data.supplier);
+  closeAllPanels();
+  renderSupplierPaymentsAll();
+});
+document.getElementById('deleteSpBtn').addEventListener('click', () => {
+  const id = document.getElementById('spId').value;
+  if(id && confirm('Delete this supplier payment entry?')){
+    SUPPLIER_PAYMENTS = SUPPLIER_PAYMENTS.filter(x=>x.id!==id);
+    saveArr(K.supplierPayments, SUPPLIER_PAYMENTS);
+    closeAllPanels();
+    renderSupplierPaymentsAll();
+  }
+});
+document.getElementById('spSearchBox').addEventListener('input', e => { spSearch = e.target.value; renderSpTable(); });
+document.getElementById('clearSpFiltersBtn').addEventListener('click', () => { spSearch=''; document.getElementById('spSearchBox').value=''; renderSpTable(); });
+document.getElementById('exportSupplierPaymentsBtn').addEventListener('click', () => {
+  const rows = SUPPLIER_PAYMENTS.map(p => ({ 'Date': p.date, 'Supplier': p.supplier, 'Mode': p.mode, 'Reference / UTR': p.refNo, 'Amount': p.amount, 'Discount Received': p.discount, 'Bank Account Debited': bankAccountLabel(p.bankAccount), 'Invoice Reference': p.invoiceRef, 'Remarks': p.remarks }));
+  downloadWorkbook(rows, 'Supplier Payments', COMPANY_LABEL.replace(/[^a-z0-9]+/gi,'_') + '_SupplierPayments');
+});
+
+function openSupplierLedger(supplierId){
+  const s = SUPPLIERS.find(x=>x.id===supplierId);
+  if(!s) return;
+  const key = s.name.trim().toLowerCase();
+  const purchases = PURCHASES.filter(p => p.supplier.trim().toLowerCase() === key)
+    .slice().sort((a,b)=>(a.purchaseDate||'').localeCompare(b.purchaseDate||''));
+  const payments = SUPPLIER_PAYMENTS.filter(p => p.supplier.trim().toLowerCase() === key)
+    .slice().sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  const opening = Number(s.openingBalance)||0;
+  let runningCredit = opening, runningDebit = 0;
+  const rowsHtml = [];
+  rowsHtml.push(`<tr><td>${formatDate(todayISO())}</td><td>Opening balance</td><td class="num"></td><td class="num">${opening.toLocaleString('en-IN')}</td></tr>`);
+  purchases.forEach(p => {
+    const total = purchaseTotals(p).total;
+    runningCredit += total;
+    rowsHtml.push(`<tr><td>${formatDate(p.purchaseDate)}</td><td>Purchase ${escapeHtml(p.invoiceNo||'')}</td><td class="num"></td><td class="num">${total.toLocaleString('en-IN')}</td></tr>`);
+  });
+  payments.forEach(p => {
+    const amt = (Number(p.amount)||0)+(Number(p.discount)||0);
+    runningDebit += amt;
+    rowsHtml.push(`<tr><td>${formatDate(p.date)}</td><td>Payment made${p.refNo?(' — '+escapeHtml(p.refNo)):''}${p.discount?(' (incl. ₹'+p.discount.toLocaleString('en-IN')+' discount)'):''}</td><td class="num">${amt.toLocaleString('en-IN')}</td><td class="num"></td></tr>`);
+  });
+  const payable = runningCredit - runningDebit;
+  openReportWindow('Supplier statement — '+s.name, s.name+(s.gstin?(' · GSTIN: '+s.gstin):'')+' — statement of account as on '+formatDate(todayISO()),
+    rowsHtml.join('') + `<tr class="total-row"><td colspan="3">Amount payable</td><td class="num">₹${payable.toLocaleString('en-IN')}</td></tr>`,
+    '<th>Date</th><th>Particulars</th><th class="num">Paid (₹)</th><th class="num">Owed (₹)</th>');
+}
+
+/* ================= MONTHLY SUMMARY ================= */
+function monthlySummaryData(){
+  const startYear = currentFY === 'all' ? fyStartYearForDate(new Date()) : Number(currentFY);
+  const months = [];
+  for(let i=0;i<12;i++){
+    const m = (3 + i) % 12;
+    const y = startYear + (3 + i >= 12 ? 1 : 0);
+    months.push({ year:y, month:m, label: new Date(y, m, 1).toLocaleDateString('en-IN', { month:'short', year:'numeric' }), key: y + '-' + String(m+1).padStart(2,'0') });
+  }
+  SALES.forEach(recomputeSale);
+  return months.map(mo => {
+    const inMonth = (d) => d && d.slice(0,7) === mo.key;
+    const sales = SALES.filter(s => inMonth(s.saleDate)).reduce((sum,s)=>sum+(s.totalValue||0),0);
+    const grossProfit = SALES.filter(s => inMonth(s.saleDate)).reduce((sum,s)=>sum+(s.grossProfit!=null?s.grossProfit:0),0);
+    const purchases = PURCHASES.filter(p => inMonth(p.purchaseDate)).reduce((sum,p)=>sum+purchaseTotals(p).total,0);
+    const receipts = PAYMENTS.filter(p => inMonth(p.date)).reduce((sum,p)=>sum+(Number(p.amount)||0)+(Number(p.discount)||0),0);
+    const payments = SUPPLIER_PAYMENTS.filter(p => inMonth(p.date)).reduce((sum,p)=>sum+(Number(p.amount)||0)+(Number(p.discount)||0),0);
+    const expenses = EXPENSES.filter(e => inMonth(e.date)).reduce((sum,e)=>sum+(Number(e.amount)||0),0);
+    return { label: mo.label, sales, purchases, receipts, payments, expenses, netProfit: grossProfit - expenses };
+  });
+}
+function renderMonthlySummary(){
+  const rows = monthlySummaryData();
+  const tbody = document.getElementById('monthlySummaryRows');
+  tbody.innerHTML = '';
+  const totals = { sales:0, purchases:0, receipts:0, payments:0, expenses:0, netProfit:0 };
+  rows.forEach(r => {
+    Object.keys(totals).forEach(k => totals[k] += r[k]);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="nametxt">${escapeHtml(r.label)}</td>
+      <td class="num">${formatCurrency(r.sales)}</td>
+      <td class="num">${formatCurrency(r.purchases)}</td>
+      <td class="num">${formatCurrency(r.receipts)}</td>
+      <td class="num">${formatCurrency(r.payments)}</td>
+      <td class="num">${formatCurrency(r.expenses)}</td>
+      <td class="num" style="font-weight:600; ${r.netProfit<0?'color:var(--overdue);':''}">${formatCurrency(r.netProfit)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  const totalTr = document.createElement('tr');
+  totalTr.style.background = '#F2F3EE';
+  totalTr.innerHTML = `
+    <td class="nametxt">Total</td>
+    <td class="num" style="font-weight:700;">${formatCurrency(totals.sales)}</td>
+    <td class="num" style="font-weight:700;">${formatCurrency(totals.purchases)}</td>
+    <td class="num" style="font-weight:700;">${formatCurrency(totals.receipts)}</td>
+    <td class="num" style="font-weight:700;">${formatCurrency(totals.payments)}</td>
+    <td class="num" style="font-weight:700;">${formatCurrency(totals.expenses)}</td>
+    <td class="num" style="font-weight:700; ${totals.netProfit<0?'color:var(--overdue);':''}">${formatCurrency(totals.netProfit)}</td>
+  `;
+  tbody.appendChild(totalTr);
+}
+document.getElementById('exportMonthlySummaryBtn').addEventListener('click', () => {
+  const rows = monthlySummaryData().map(r => ({ 'Month': r.label, 'Sales': r.sales, 'Purchases': r.purchases, 'Receipts': r.receipts, 'Payments': r.payments, 'Expenses': r.expenses, 'Net Profit': r.netProfit }));
+  downloadWorkbook(rows, 'Monthly Summary', COMPANY_LABEL.replace(/[^a-z0-9]+/gi,'_') + '_MonthlySummary');
+});
+
 /* ---- sale form auto-fill ---- */
 document.getElementById('sCustomer').addEventListener('change', (e) => {
   const c = findCustomer(e.target.value);
@@ -3499,6 +3906,27 @@ function syncSaleDueDate(){
 document.getElementById('sSaleDate').addEventListener('change', syncSaleDueDate);
 document.getElementById('sCreditPeriod').addEventListener('input', syncSaleDueDate);
 
+function convertLeadToSale(leadId){
+  const l = LEADS.find(x=>x.id===leadId);
+  if(!l) return;
+  const items = (l.items||[]).filter(it => it.status === 'Order Received').map(it => ({
+    product: it.product, make: it.make, grade: it.grade, packing: it.packing,
+    qty: it.qty, unit: it.unit, unitPrice: it.unitPrice, gstRate: it.gstRate,
+    supplier: '', purchasePrice: '', purchaseGstRate: '',
+  }));
+  if(!items.length){ alert('No "Order Received" line items on this lead to convert.'); return; }
+  openSalePanel(null);
+  document.getElementById('sCustomer').value = l.customer;
+  document.getElementById('sTransport').value = l.transport || '';
+  const cust = findCustomer(l.customer);
+  if(cust && cust.paymentTerms !== '' && cust.paymentTerms != null){
+    document.getElementById('sCreditPeriod').value = cust.paymentTerms;
+  }
+  syncSaleDueDate();
+  document.getElementById('sItemsContainer').innerHTML = '';
+  items.forEach(it => addItemRow('sItemsContainer', 's', it, true));
+  alert('Review the pre-filled Sales Ledger entry below and click "Save entry" to confirm the sale.');
+}
 function openSalePanel(id){
   const isEdit = !!id;
   document.getElementById('salePanelTitle').textContent = isEdit ? 'Edit sale entry' : 'Add sale entry';
@@ -3685,6 +4113,7 @@ document.getElementById('saveCustomerBtn').addEventListener('click', () => {
   const id = document.getElementById('customerId').value;
   const name = document.getElementById('cName').value.trim();
   if(!name){ alert('Customer name is required.'); return; }
+  if(!warnIfDuplicate(CUSTOMERS, name, id, 'customer')) return;
   const data = {
     name,
     contact: document.getElementById('cContact').value.trim(),
@@ -3725,6 +4154,122 @@ document.getElementById('deleteCustomerBtn').addEventListener('click', () => {
 });
 document.getElementById('customerSearchBox').addEventListener('input', e => { customerSearch = e.target.value; renderCustomerTable(); });
 document.getElementById('clearCustomerFiltersBtn').addEventListener('click', () => { customerSearch=''; document.getElementById('customerSearchBox').value=''; renderCustomerTable(); });
+
+/* ================= SUGGESTIONS ================= */
+function refreshSuggestionRelatedList(){
+  const names = Array.from(new Set([...CUSTOMERS.map(c=>c.name), ...PRODUCTS.map(p=>p.name)].filter(Boolean)));
+  document.getElementById('suggestionRelatedList').innerHTML = names.map(n => `<option value="${escapeHtml(n)}">`).join('');
+}
+function renderSuggestionStats(){
+  document.getElementById('statSuggTotal').textContent = SUGGESTIONS.length;
+  document.getElementById('statSuggNew').textContent = SUGGESTIONS.filter(s=>s.status==='New').length;
+  document.getElementById('statSuggImplemented').textContent = SUGGESTIONS.filter(s=>s.status==='Implemented').length;
+}
+function applySuggestionFilters(list){
+  return list.filter(s => {
+    if(suggestionFilters.category !== 'all' && s.category !== suggestionFilters.category) return false;
+    if(suggestionFilters.status !== 'all' && s.status !== suggestionFilters.status) return false;
+    if(suggestionFilters.search){
+      const q = suggestionFilters.search.toLowerCase();
+      if(!((s.relatedTo||'')+' '+(s.text||'')).toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+}
+const suggStatusClass = { New:'status-today', Reviewed:'stage-Negotiation', Implemented:'status-cleared', Rejected:'status-overdue' };
+function renderSuggestionTable(){
+  const tbody = document.getElementById('suggestionRows');
+  const filtered = applySuggestionFilters(SUGGESTIONS).slice().sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  tbody.innerHTML = '';
+  document.getElementById('suggestionEmptyState').style.display = filtered.length ? 'none' : 'block';
+  filtered.forEach(s => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${formatDate(s.date)}</td>
+      <td><span class="badge stage-New">${escapeHtml(s.category||'Other')}</span></td>
+      <td>${escapeHtml(s.relatedTo||'—')}</td>
+      <td style="max-width:320px; color:var(--muted);">${escapeHtml(truncate(s.text,80))}</td>
+      <td><span class="badge ${suggStatusClass[s.status]||'status-today'}">${escapeHtml(s.status)}</span></td>
+      <td><div class="row-actions">
+        <button class="icon-btn" data-action="edit" data-id="${s.id}" title="Edit">${ICONS.edit}</button>
+        <button class="icon-btn" data-action="delete" data-id="${s.id}" title="Delete">${ICONS.trash}</button>
+      </div></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  tbody.querySelectorAll('[data-action="edit"]').forEach(b => b.addEventListener('click', ()=>openSuggestionPanel(b.dataset.id)));
+  tbody.querySelectorAll('[data-action="delete"]').forEach(b => b.addEventListener('click', ()=>{
+    if(confirm('Delete this suggestion?')){
+      SUGGESTIONS = SUGGESTIONS.filter(s=>s.id!==b.dataset.id);
+      saveArr(K.suggestions, SUGGESTIONS);
+      renderSuggestionsAll();
+    }
+  }));
+}
+function renderSuggestionsAll(){ renderSuggestionStats(); renderSuggestionTable(); refreshSuggestionRelatedList(); }
+
+function openSuggestionPanel(id){
+  const isEdit = !!id;
+  document.getElementById('suggestionPanelTitle').textContent = isEdit ? 'Edit suggestion' : 'Add suggestion';
+  document.getElementById('deleteSuggestionBtn').style.display = isEdit ? 'block' : 'none';
+  const s = isEdit ? SUGGESTIONS.find(x=>x.id===id) : null;
+
+  document.getElementById('suggId').value = s ? s.id : '';
+  document.getElementById('suggDate').value = s ? (s.date||'') : todayISO();
+  document.getElementById('suggCategory').value = s ? (s.category||'Product') : 'Product';
+  document.getElementById('suggRelatedTo').value = s ? (s.relatedTo||'') : '';
+  document.getElementById('suggText').value = s ? (s.text||'') : '';
+  document.getElementById('suggStatus').value = s ? (s.status||'New') : 'New';
+
+  openPanel('suggestionPanel');
+  document.getElementById('suggText').focus();
+}
+document.getElementById('addSuggestionBtn').addEventListener('click', () => openSuggestionPanel(null));
+
+document.getElementById('saveSuggestionBtn').addEventListener('click', () => {
+  const id = document.getElementById('suggId').value;
+  const text = document.getElementById('suggText').value.trim();
+  if(!text){ alert('Please enter the suggestion.'); return; }
+  const data = {
+    date: document.getElementById('suggDate').value || todayISO(),
+    category: document.getElementById('suggCategory').value,
+    relatedTo: document.getElementById('suggRelatedTo').value.trim(),
+    text,
+    status: document.getElementById('suggStatus').value,
+  };
+  if(id){ const idx = SUGGESTIONS.findIndex(x=>x.id===id); if(idx>-1) SUGGESTIONS[idx] = { ...SUGGESTIONS[idx], ...data }; }
+  else{ SUGGESTIONS.push({ id: uid('SG'), ...data }); }
+  saveArr(K.suggestions, SUGGESTIONS);
+  closeAllPanels();
+  renderSuggestionsAll();
+});
+document.getElementById('deleteSuggestionBtn').addEventListener('click', () => {
+  const id = document.getElementById('suggId').value;
+  if(id && confirm('Delete this suggestion?')){
+    SUGGESTIONS = SUGGESTIONS.filter(s=>s.id!==id);
+    saveArr(K.suggestions, SUGGESTIONS);
+    closeAllPanels();
+    renderSuggestionsAll();
+  }
+});
+document.getElementById('suggestionSearchBox').addEventListener('input', e => { suggestionFilters.search = e.target.value; renderSuggestionTable(); });
+document.getElementById('suggestionCategoryFilter').addEventListener('change', e => { suggestionFilters.category = e.target.value; renderSuggestionTable(); });
+document.getElementById('suggestionStatusChips').addEventListener('click', e => {
+  const chip = e.target.closest('.chip'); if(!chip) return;
+  document.querySelectorAll('#suggestionStatusChips .chip').forEach(c=>c.classList.remove('active'));
+  chip.classList.add('active'); suggestionFilters.status = chip.dataset.status; renderSuggestionTable();
+});
+document.getElementById('clearSuggestionFiltersBtn').addEventListener('click', () => {
+  suggestionFilters = { search:'', category:'all', status:'all' };
+  document.getElementById('suggestionSearchBox').value=''; document.getElementById('suggestionCategoryFilter').value='all';
+  document.querySelectorAll('#suggestionStatusChips .chip').forEach(c=>c.classList.remove('active'));
+  document.querySelector('#suggestionStatusChips .chip[data-status="all"]').classList.add('active');
+  renderSuggestionTable();
+});
+document.getElementById('exportSuggestionsBtn').addEventListener('click', () => {
+  const rows = SUGGESTIONS.map(s => ({ 'Date': s.date, 'Category': s.category, 'Related To': s.relatedTo, 'Suggestion': s.text, 'Status': s.status }));
+  downloadWorkbook(rows, 'Suggestions', COMPANY_LABEL.replace(/[^a-z0-9]+/gi,'_') + '_Suggestions');
+});
 
 /* ================= CUSTOMER ISSUES ================= */
 function renderIssueStats(){
@@ -3852,6 +4397,15 @@ function openCustomerIssuesStatement(customerId){
 
 
 /* ================= SUPPLIERS ================= */
+function supplierPayable(supplier){
+  const nameKey = supplier.name.trim().toLowerCase();
+  const opening = Number(supplier.openingBalance)||0;
+  const purchaseTotal = PURCHASES.filter(p => p.supplier.trim().toLowerCase() === nameKey)
+    .reduce((sum, p) => sum + purchaseTotals(p).total, 0);
+  const paidTotal = SUPPLIER_PAYMENTS.filter(p => p.supplier.trim().toLowerCase() === nameKey)
+    .reduce((sum, p) => sum + (Number(p.amount)||0) + (Number(p.discount)||0), 0);
+  return opening + purchaseTotal - paidTotal;
+}
 function renderSupplierTable(){
   const tbody = document.getElementById('supplierRows');
   const q = supplierSearch.toLowerCase();
@@ -3859,21 +4413,26 @@ function renderSupplierTable(){
   tbody.innerHTML = '';
   document.getElementById('supplierEmptyState').style.display = filtered.length ? 'none' : 'block';
   filtered.forEach(s => {
+    const payable = supplierPayable(s);
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="nametxt">${escapeHtml(s.name)}</td>
       <td><div class="stack-line">${escapeHtml(s.contact||'—')}</div><div class="stack-line">${escapeHtml(s.phone||'—')}</div></td>
       <td>${escapeHtml(s.gstin||'—')}</td>
       <td>${escapeHtml([s.city,s.state].filter(Boolean).join(', ')||'—')}</td>
-      <td style="max-width:220px; color:var(--muted);">${escapeHtml(truncate(s.applicationDetails,50))}</td>
-      <td style="max-width:140px; color:var(--muted);">${escapeHtml(truncate(s.notes,30))}</td>
+      <td class="num">${formatCurrency(s.openingBalance||0)}</td>
+      <td class="num" style="font-weight:600; ${payable>0?'color:var(--overdue);':''}">${formatCurrency(payable)}</td>
+      <td style="max-width:200px; color:var(--muted);">${escapeHtml(truncate(s.applicationDetails,50))}</td>
+      <td style="max-width:120px; color:var(--muted);">${escapeHtml(truncate(s.notes,30))}</td>
       <td><div class="row-actions">
+        <button class="icon-btn" data-action="ledger" data-id="${s.id}" title="Supplier statement">${ICONS.statement}</button>
         <button class="icon-btn" data-action="edit" data-id="${s.id}">${ICONS.edit}</button>
         <button class="icon-btn" data-action="delete" data-id="${s.id}">${ICONS.trash}</button>
       </div></td>
     `;
     tbody.appendChild(tr);
   });
+  tbody.querySelectorAll('[data-action="ledger"]').forEach(b => b.addEventListener('click', ()=>openSupplierLedger(b.dataset.id)));
   tbody.querySelectorAll('[data-action="edit"]').forEach(b => b.addEventListener('click', ()=>openSupplierPanel(b.dataset.id)));
   tbody.querySelectorAll('[data-action="delete"]').forEach(b => b.addEventListener('click', ()=>{
     if(confirm('Delete this supplier?')){
@@ -3900,6 +4459,7 @@ function openSupplierPanel(id){
   document.getElementById('spCity').value = s ? (s.city||'') : '';
   document.getElementById('spState').value = s ? (s.state||'') : '';
   document.getElementById('spPincode').value = s ? (s.pincode||'') : '';
+  document.getElementById('spOpeningBalance').value = s ? (s.openingBalance||0) : 0;
   document.getElementById('spApplication').value = s ? (s.applicationDetails||'') : '';
   document.getElementById('spNotes').value = s ? (s.notes||'') : '';
   openPanel('supplierPanel');
@@ -3910,6 +4470,7 @@ document.getElementById('saveSupplierBtn').addEventListener('click', () => {
   const id = document.getElementById('supplierId').value;
   const name = document.getElementById('spName').value.trim();
   if(!name){ alert('Supplier name is required.'); return; }
+  if(!warnIfDuplicate(SUPPLIERS, name, id, 'supplier')) return;
   const data = {
     name,
     contact: document.getElementById('spContact').value.trim(),
@@ -3922,6 +4483,7 @@ document.getElementById('saveSupplierBtn').addEventListener('click', () => {
     city: document.getElementById('spCity').value.trim(),
     state: document.getElementById('spState').value.trim(),
     pincode: document.getElementById('spPincode').value.trim(),
+    openingBalance: Number(document.getElementById('spOpeningBalance').value)||0,
     applicationDetails: document.getElementById('spApplication').value.trim(),
     notes: document.getElementById('spNotes').value.trim(),
   };
@@ -4052,6 +4614,7 @@ document.getElementById('saveProductBtn').addEventListener('click', () => {
   const id = document.getElementById('productId').value;
   const name = document.getElementById('pName').value.trim();
   if(!name){ alert('Product name is required.'); return; }
+  if(!warnIfDuplicate(PRODUCTS, name, id, 'product')) return;
   const openingStock = Number(document.getElementById('pOpeningStock').value)||0;
   const data = {
     name,
@@ -4104,12 +4667,37 @@ overlayEl.addEventListener('click', closeAllPanels);
 document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', closeAllPanels));
 
 /* ================= EXCEL EXPORT ================= */
-function downloadWorkbook(rows, sheetName, filenamePrefix){
+async function saveBlobWithPicker(blob, suggestedName, mimeType, extension){
+  if(window.showSaveFilePicker){
+    try{
+      const handle = await window.showSaveFilePicker({
+        suggestedName,
+        types: [{ description: 'File', accept: { [mimeType]: ['.' + extension] } }]
+      });
+      const writable = await handle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      return true;
+    }catch(err){
+      if(err && err.name === 'AbortError') return false;
+      // fall through to the default download below on any other error (e.g. unsupported context)
+    }
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = suggestedName;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 5000);
+  return true;
+}
+async function downloadWorkbook(rows, sheetName, filenamePrefix){
   const ws = XLSX.utils.json_to_sheet(rows);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, sheetName);
   const fname = filenamePrefix + '_' + todayISO() + '.xlsx';
-  XLSX.writeFile(wb, fname);
+  const arrayBuffer = XLSX.write(wb, { bookType:'xlsx', type:'array' });
+  const blob = new Blob([arrayBuffer], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  await saveBlobWithPicker(blob, fname, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'xlsx');
 }
 document.getElementById('exportLeadsBtn').addEventListener('click', () => {
   const rows = [];
@@ -4149,6 +4737,133 @@ document.getElementById('exportSalesBtn').addEventListener('click', () => {
   });
   downloadWorkbook(rows, 'Sales Ledger', COMPANY_LABEL.replace(/[^a-z0-9]+/gi,'_') + '_SalesLedger');
 });
+
+/* ---- Sales Ledger Excel import — groups rows by Invoice No into multi-line entries ---- */
+const SALES_IMPORT_FIELD_ALIASES = {
+  customer: ['customer','customer name','client'],
+  invoiceNo: ['invoice no','invoice number','invoice no.','invoice'],
+  saleDate: ['sale date','date'],
+  transport: ['transport'],
+  product: ['product'],
+  make: ['make'],
+  grade: ['grade'],
+  packing: ['packing size','packing'],
+  qty: ['quantity','qty'],
+  unit: ['unit'],
+  unitPrice: ['unit price','rate','price'],
+  gstRate: ['gst rate (%)','gst rate','gst %','gst'],
+  creditPeriod: ['credit period (days)','credit period','credit days'],
+  dueDate: ['due date'],
+  opening: ['opening balance','opening'],
+  received: ['amount received','received'],
+  dispatchStatus: ['dispatch status'],
+  lrNumber: ['lr number','lr no','lr no.'],
+  lrDate: ['lr date'],
+  notes: ['remarks','notes'],
+};
+function buildSalesHeaderMap(sampleRow){
+  const map = {};
+  const headers = Object.keys(sampleRow||{});
+  headers.forEach(h => {
+    const norm = normalizeHeader(h);
+    for(const field in SALES_IMPORT_FIELD_ALIASES){
+      if(map[field]) continue;
+      if(SALES_IMPORT_FIELD_ALIASES[field].some(alias => normalizeHeader(alias) === norm)){ map[field] = h; }
+    }
+  });
+  return map;
+}
+document.getElementById('importSalesBtn').addEventListener('click', () => document.getElementById('salesImportFileInput').click());
+document.getElementById('salesImportFileInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    try{
+      const data = new Uint8Array(evt.target.result);
+      const wb = XLSX.read(data, { type:'array' });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const json = XLSX.utils.sheet_to_json(sheet, { defval:'' });
+      if(!json.length){ alert('No rows found in that file.'); e.target.value=''; return; }
+      const headerMap = buildSalesHeaderMap(json[0]);
+      if(!headerMap.customer){ alert('Could not find a "Customer" column in this file.'); e.target.value=''; return; }
+      if(!headerMap.product){ alert('Could not find a "Product" column in this file.'); e.target.value=''; return; }
+
+      const getVal = (row, field) => headerMap[field] ? String(row[headerMap[field]]||'').trim() : '';
+      const existingInvoiceNos = new Set(SALES.map(s => (s.invoiceNo||'').trim().toLowerCase()).filter(Boolean));
+
+      // Group contiguous rows by Invoice No (or Customer+Date when Invoice No is blank)
+      const groups = [];
+      let current = null, currentKey = null;
+      json.forEach(row => {
+        const customer = getVal(row,'customer');
+        if(!customer) return;
+        const invoiceNo = getVal(row,'invoiceNo');
+        const saleDate = getVal(row,'saleDate');
+        const key = invoiceNo ? ('INV:'+invoiceNo.toLowerCase()) : ('CD:'+customer.toLowerCase()+'|'+saleDate);
+        if(key !== currentKey){
+          current = { headerRow: row, rows: [] };
+          groups.push(current);
+          currentKey = key;
+        }
+        current.rows.push(row);
+      });
+
+      let importedInvoices = 0, importedLines = 0, skippedDuplicate = 0, skippedEmpty = 0;
+      groups.forEach(g => {
+        const h = g.headerRow;
+        const invoiceNo = getVal(h,'invoiceNo');
+        if(invoiceNo && existingInvoiceNos.has(invoiceNo.trim().toLowerCase())){ skippedDuplicate++; return; }
+        const items = g.rows.map(row => ({
+          product: getVal(row,'product'), make: getVal(row,'make'), grade: getVal(row,'grade'), packing: getVal(row,'packing'),
+          qty: Number(getVal(row,'qty'))||0, unit: getVal(row,'unit'), unitPrice: Number(getVal(row,'unitPrice'))||0,
+          gstRate: Number(getVal(row,'gstRate'))||0, supplier:'', purchasePrice:'', purchaseGstRate:'',
+        })).filter(it => it.product);
+        if(!items.length){ skippedEmpty++; return; }
+        const creditPeriod = Number(getVal(h,'creditPeriod'))||0;
+        const saleDate = getVal(h,'saleDate') || todayISO();
+        const sale = {
+          id: uid('S'),
+          customer: getVal(h,'customer'),
+          invoiceNo,
+          saleDate,
+          transport: getVal(h,'transport'),
+          items,
+          creditPeriod,
+          dueDate: getVal(h,'dueDate') || addDays(saleDate, creditPeriod),
+          opening: Number(getVal(h,'opening'))||0,
+          received: Number(getVal(h,'received'))||0,
+          dispatchStatus: getVal(h,'dispatchStatus') || 'Pending dispatch',
+          lrNumber: getVal(h,'lrNumber'),
+          lrDate: getVal(h,'lrDate'),
+          notes: getVal(h,'notes'),
+          customFields: [],
+        };
+        SALES.push(sale);
+        applySaleStockEffect(sale);
+        upsertCustomerFromEntry(sale.customer, '', '', '', sale.transport);
+        items.forEach(it => upsertProductFromEntry(it.product, it.make, it.grade, it.packing, it.unit, it.gstRate));
+        if(invoiceNo) existingInvoiceNos.add(invoiceNo.trim().toLowerCase());
+        importedInvoices++; importedLines += items.length;
+      });
+
+      SALES.forEach(recomputeSale);
+      saveArr(K.sales, SALES);
+      saveArr(K.products, PRODUCTS);
+      recomputeAvgCosts();
+      refreshDatalists();
+      renderSalesAll();
+      renderProductTable();
+      renderCustomerTable();
+      alert(`Import complete: ${importedInvoices} invoice${importedInvoices===1?'':'s'} added (${importedLines} line item${importedLines===1?'':'s'}).${skippedDuplicate?(' '+skippedDuplicate+' skipped — invoice number already on file.'):''}${skippedEmpty?(' '+skippedEmpty+' skipped — no product rows found.'):''}`);
+    }catch(err){
+      alert('Could not read that file — make sure it is a valid .xlsx or .xls file.');
+    }
+    e.target.value = '';
+  };
+  reader.readAsArrayBuffer(file);
+});
+
 document.getElementById('exportCustomersBtn').addEventListener('click', () => {
   const rows = CUSTOMERS.map(c => {
     const issues = CUSTOMER_ISSUES.filter(i => i.customer.trim().toLowerCase() === c.name.trim().toLowerCase());
@@ -4175,6 +4890,9 @@ const CUSTOMER_IMPORT_FIELD_ALIASES = {
   pincode: ['pincode','pin code','zip','postal code'],
   openingBalance: ['opening balance'],
   paymentTerms: ['payment terms days','payment terms','credit days','credit period'],
+  refBy: ['reference by','reference given by','referred by'],
+  refContact: ['reference contact'],
+  refNotes: ['reference notes'],
   notes: ['notes','remarks','remark'],
 };
 function normalizeHeader(h){ return String(h||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(); }
@@ -4207,6 +4925,8 @@ document.getElementById('customerImportFileInput').addEventListener('change', (e
       const headerMap = buildHeaderMap(json[0]);
       if(!headerMap.name){ alert('Could not find a "Name" column in this file. Please make sure one column is named Name, Customer Name, or Customer.'); e.target.value=''; return; }
       let added = 0, updated = 0;
+      const IDENTITY_FIELDS = ['contact','phone','contact2','phone2','email','gstin','pan','kycStatus','transport','address','region','city','state','pincode','refBy','refContact','refNotes'];
+      const KEEP_LOCAL_FIELDS = ['openingBalance','paymentTerms','notes'];
       json.forEach(row => {
         const getVal = (field) => headerMap[field] ? String(row[headerMap[field]]||'').trim() : '';
         const name = getVal('name');
@@ -4216,13 +4936,18 @@ document.getElementById('customerImportFileInput').addEventListener('change', (e
           contact: getVal('contact'), phone: getVal('phone'), contact2: getVal('contact2'), phone2: getVal('phone2'),
           email: getVal('email'), gstin: getVal('gstin'), pan: getVal('pan'), kycStatus: getVal('kycStatus'), transport: getVal('transport'), address: getVal('address'),
           region: getVal('region'), city: getVal('city'), state: getVal('state'), pincode: getVal('pincode'),
+          refBy: getVal('refBy'), refContact: getVal('refContact'), refNotes: getVal('refNotes'),
           openingBalance: getVal('openingBalance') ? Number(getVal('openingBalance'))||0 : '',
           paymentTerms: getVal('paymentTerms') ? Number(getVal('paymentTerms'))||'' : '',
           notes: getVal('notes'),
         };
         if(existing){
           let changed = false;
-          Object.keys(incoming).forEach(field => {
+          IDENTITY_FIELDS.forEach(field => {
+            const hasIncoming = incoming[field] !== undefined && incoming[field] !== null && incoming[field] !== '';
+            if(hasIncoming && existing[field] !== incoming[field]){ existing[field] = incoming[field]; changed = true; }
+          });
+          KEEP_LOCAL_FIELDS.forEach(field => {
             const hasExisting = existing[field] !== undefined && existing[field] !== null && existing[field] !== '';
             const hasIncoming = incoming[field] !== undefined && incoming[field] !== null && incoming[field] !== '';
             if(!hasExisting && hasIncoming){ existing[field] = incoming[field]; changed = true; }
@@ -4236,7 +4961,7 @@ document.getElementById('customerImportFileInput').addEventListener('change', (e
       saveArr(K.customers, CUSTOMERS);
       refreshDatalists();
       renderCustomerTable();
-      alert(`Import complete: ${added} new customer${added===1?'':'s'} added, ${updated} existing customer${updated===1?'':'s'} filled in.`);
+      alert(`Import complete: ${added} new customer${added===1?'':'s'} added, ${updated} existing customer${updated===1?'':'s'} synced (contact/address/KYC details matched to the source; opening balance and payment terms left as-is).`);
     }catch(err){
       alert('Could not read that file — make sure it is a valid .xlsx or .xls file.');
     }
@@ -4272,14 +4997,11 @@ document.getElementById('exportPurchasesBtn').addEventListener('click', () => {
 });
 
 /* ================= JSON BACKUP / RESTORE ================= */
-document.getElementById('exportAllBtn').addEventListener('click', () => {
-  const payload = { company: COMPANY_LABEL, exportedAt: new Date().toISOString(), customers: CUSTOMERS, suppliers: SUPPLIERS, products: PRODUCTS, leads: LEADS, sales: SALES, purchases: PURCHASES, expenses: EXPENSES, payments: PAYMENTS, tasks: TASKS, cashVouchers: CASH_VOUCHERS, meetings: MEETINGS, meetingPoints: MEETING_POINTS, meetingActions: MEETING_ACTIONS, customerIssues: CUSTOMER_ISSUES, profile: PROFILE };
+document.getElementById('exportAllBtn').addEventListener('click', async () => {
+  const payload = { company: COMPANY_LABEL, exportedAt: new Date().toISOString(), customers: CUSTOMERS, suppliers: SUPPLIERS, products: PRODUCTS, leads: LEADS, sales: SALES, purchases: PURCHASES, expenses: EXPENSES, payments: PAYMENTS, tasks: TASKS, cashVouchers: CASH_VOUCHERS, meetings: MEETINGS, meetingPoints: MEETING_POINTS, meetingActions: MEETING_ACTIONS, customerIssues: CUSTOMER_ISSUES, suggestions: SUGGESTIONS, supplierPayments: SUPPLIER_PAYMENTS, profile: PROFILE };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = COMPANY_LABEL.replace(/[^a-z0-9]+/gi,'_') + '_backup_' + todayISO() + '.json';
-  a.click();
-  setTimeout(()=>URL.revokeObjectURL(url), 5000);
+  const fname = COMPANY_LABEL.replace(/[^a-z0-9]+/gi,'_') + '_backup_' + todayISO() + '.json';
+  await saveBlobWithPicker(blob, fname, 'application/json', 'json');
 });
 document.getElementById('importAllBtn').addEventListener('click', () => document.getElementById('importFileInput').click());
 document.getElementById('importFileInput').addEventListener('change', (e) => {
@@ -4304,13 +5026,15 @@ document.getElementById('importFileInput').addEventListener('change', (e) => {
       MEETING_POINTS = Array.isArray(data.meetingPoints) ? data.meetingPoints : [];
       MEETING_ACTIONS = Array.isArray(data.meetingActions) ? data.meetingActions : [];
       CUSTOMER_ISSUES = Array.isArray(data.customerIssues) ? data.customerIssues : [];
+      SUPPLIER_PAYMENTS = Array.isArray(data.supplierPayments) ? data.supplierPayments : [];
+      SUGGESTIONS = Array.isArray(data.suggestions) ? data.suggestions : [];
       PROFILE = (data.profile && typeof data.profile === 'object') ? data.profile : defaultProfile();
-      saveArr(K.customers, CUSTOMERS); saveArr(K.suppliers, SUPPLIERS); saveArr(K.products, PRODUCTS); saveArr(K.leads, LEADS); saveArr(K.sales, SALES); saveArr(K.purchases, PURCHASES); saveArr(K.expenses, EXPENSES); saveArr(K.payments, PAYMENTS); saveArr(K.tasks, TASKS); saveArr(K.cashVouchers, CASH_VOUCHERS); saveArr(K.meetings, MEETINGS); saveArr(K.meetingPoints, MEETING_POINTS); saveArr(K.meetingActions, MEETING_ACTIONS); saveArr(K.customerIssues, CUSTOMER_ISSUES); saveObj(K.profile, PROFILE);
+      saveArr(K.customers, CUSTOMERS); saveArr(K.suppliers, SUPPLIERS); saveArr(K.products, PRODUCTS); saveArr(K.leads, LEADS); saveArr(K.sales, SALES); saveArr(K.purchases, PURCHASES); saveArr(K.expenses, EXPENSES); saveArr(K.payments, PAYMENTS); saveArr(K.tasks, TASKS); saveArr(K.cashVouchers, CASH_VOUCHERS); saveArr(K.meetings, MEETINGS); saveArr(K.meetingPoints, MEETING_POINTS); saveArr(K.meetingActions, MEETING_ACTIONS); saveArr(K.customerIssues, CUSTOMER_ISSUES); saveArr(K.suggestions, SUGGESTIONS); saveObj(K.profile, PROFILE);
       recomputeAvgCosts();
       refreshDatalists();
       loadProfileForm();
       openMeetingId = null;
-      renderLeadsAll(); renderSalesAll(); renderCustomerTable(); renderSupplierTable(); renderProductTable(); renderPurchasesAll(); renderExpensesAll(); renderPaymentsAll(); renderTasksAll(); renderCashVouchersAll(); renderMeetingsAll(); renderCustomerIssuesAll();
+      renderLeadsAll(); renderSalesAll(); renderCustomerTable(); renderSupplierTable(); renderProductTable(); renderPurchasesAll(); renderExpensesAll(); renderPaymentsAll(); renderTasksAll(); renderCashVouchersAll(); renderMeetingsAll(); renderCustomerIssuesAll(); renderSuggestionsAll();
       alert('Data imported successfully.');
     }catch(err){ alert('Could not read this file — make sure it is a backup JSON exported from this same app.'); }
     e.target.value = '';
@@ -4322,7 +5046,7 @@ document.getElementById('importFileInput').addEventListener('change', (e) => {
 populateFYSelect();
 document.getElementById('fySelect').addEventListener('change', (e) => {
   currentFY = e.target.value;
-  renderSalesAll(); renderPurchasesAll(); renderExpensesAll(); renderPaymentsAll(); renderProductTable();
+  renderSalesAll(); renderPurchasesAll(); renderExpensesAll(); renderPaymentsAll(); renderProductTable(); renderSupplierPaymentsAll(); renderSupplierTable(); renderMonthlySummary();
 });
 loadProfileForm();
 refreshDatalists();
@@ -4333,6 +5057,7 @@ SALES.forEach(recomputeSale); saveArr(K.sales, SALES);
 recomputeAvgCosts();
 renderTasksAll();
 renderMeetingsAll();
+renderSuggestionsAll();
 renderLeadsAll();
 renderSalesAll();
 renderPurchasesAll();
@@ -4343,6 +5068,8 @@ renderCustomerTable();
 renderCustomerIssuesAll();
 renderSupplierTable();
 renderProductTable();
+renderSupplierPaymentsAll();
+renderMonthlySummary();
 maybeFireNotification(computeDueCounts());
 </script>
 </body>
